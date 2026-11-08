@@ -7,6 +7,7 @@ docs/ECC-INSTALL.md
 
 # ===== Java / Maven =====
 backend/target/
+.build/
 !.mvn/wrapper/maven-wrapper.jar
 *.class
 *.log
