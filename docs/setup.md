@@ -104,4 +104,11 @@ cd backend  && ./mvnw -DskipTests package      # gera target/*.jar
 cd frontend && npm run build                   # gera dist/
 ```
 
-Os Dockerfiles da raiz fazem o build completo com `docker compose up --build`.
+Os Dockerfiles da raiz fazem o build completo:
+
+```bash
+docker compose --profile full up --build   # postgres + backend + frontend
+```
+
+Sem o `--profile full`, o Compose sobe apenas o PostgreSQL — o fluxo normal de
+desenvolvimento, com backend e frontend rodando na máquina.
