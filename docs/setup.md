@@ -31,8 +31,12 @@ PostgreSQL em `localhost:5432`, banco `eventhub`, usuário `eventhub`.
 
 ```bash
 cd backend
+export JWT_SECRET="$(openssl rand -base64 48)"   # PowerShell: $env:JWT_SECRET = ...
 ./mvnw spring-boot:run
 ```
+
+Sem `JWT_SECRET` o backend usa um valor de desenvolvimento (>= 32 bytes) — serve para
+rodar local, **nunca** para produção.
 
 O Flyway aplica as migrações na subida. API em <http://localhost:8080>.
 

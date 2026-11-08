@@ -62,7 +62,7 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | Etapa | Escopo | Estado |
 | --- | --- | --- |
 | 1 | Fundação (Spring Boot, React, Postgres, Flyway, health) | ✅ |
-| 2 | Usuários e autenticação | ⬜ |
+| 2 | Usuários e autenticação (JWT, BCrypt, papéis) | ✅ |
 | 3 | Gerenciamento de eventos | ⬜ |
 | 4 | Ingressos e estoque | ⬜ |
 | 5 | Pedidos e pagamentos | ⬜ |

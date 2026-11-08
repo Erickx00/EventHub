@@ -74,6 +74,34 @@ compra. Alterar o preço do ingresso depois não reescreve o histórico.
 **Erros padronizados.** Um `@RestControllerAdvice` traduz exceções de domínio em um
 envelope único (`docs/api.md`), com `traceId` para correlacionar log e resposta.
 
+## Autenticação e autorização
+
+| Peça | Decisão |
+| --- | --- |
+| Access token | JWT HS256, 15 min, claims `sub` (UUID), `email`, `role` |
+| Refresh token | opaco (32 bytes), hash SHA-256 no banco, 7 dias, uso único |
+| Senha | BCrypt custo 12 |
+| Sessão | stateless; sem cookie, sem CSRF (apenas `Authorization: Bearer`) |
+| Autorização | `@EnableMethodSecurity` + regra de propriedade no service |
+
+Três armadilhas que custaram tempo e ficam registradas:
+
+1. **Filtro como `@Bean` roda duas vezes.** Um `Filter` exposto como bean é registrado
+   também como filtro de servlet pelo Boot. Ele acaba executando *antes* do
+   `SecurityContextHolderFilter`, que recria o contexto vazio — a autenticação é
+   descartada e tudo vira 401. Por isso `JwtAuthenticationFilter` é instanciado dentro
+   do `SecurityConfig`, não é bean.
+2. **`@WebMvcTest` escaneia `Filter` beans.** Pelo mesmo motivo acima, qualquer slice MVC
+   tentava criar o filtro sem `JwtService`. Com o filtro fora do container, o slice
+   voltou a subir.
+3. **Mockito no JDK 24+.** O auto-attach do ByteBuddy usa um processo externo. Em
+   ambiente restrito isso falha; `src/test/resources/mockito-extensions/org.mockito.plugins.MockMaker`
+   com o `SubclassByteBuddyMockMaker` resolve sem instrumentação.
+
+Autorização por papel é declarativa (`hasRole`), mas a checagem de **propriedade**
+("este organizador é dono deste evento?") fica no `Service` e devolve `403`/`404` —
+nunca no frontend e nunca no controller.
+
 ## O que ainda não existe (e por quê)
 
 - Autenticação: entra na etapa 2, junto com a entidade `User`.

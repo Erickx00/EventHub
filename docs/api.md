@@ -29,20 +29,62 @@ Base: `/api`. JSON em tudo. Datas em ISO-8601 UTC (`2027-03-20T12:00:00Z`).
 
 ## Implementado
 
-| Método | Endpoint | Resposta |
-| --- | --- | --- |
-| GET | `/api/health` | `{"status":"UP","service":"eventhub","timestamp":"..."}` |
+| Método | Endpoint | Acesso | Resposta |
+| --- | --- | --- | --- |
+| GET | `/api/health` | público | `{"status":"UP","service":"eventhub","timestamp":"..."}` |
+| POST | `/api/auth/register` | público | `201` + tokens e usuário |
+| POST | `/api/auth/login` | público | `200` + tokens e usuário |
+| POST | `/api/auth/refresh` | público (exige refresh token) | `200` + novo par de tokens |
+| POST | `/api/auth/logout` | autenticado | `204` |
+| PATCH | `/api/auth/password` | autenticado | `204` |
+| GET | `/api/users/me` | autenticado | perfil |
+| PATCH | `/api/users/me` | autenticado | perfil atualizado |
+
+### Sessão
+
+O access token é um JWT HS256 de 15 minutos. O refresh token é **opaco** (32 bytes
+aleatórios), gravado apenas como SHA-256, válido por 7 dias e de uso único: cada
+`/refresh` revoga o token apresentado e devolve outro. Reusar um token revogado falha —
+é assim que uma credencial copiada é detectada.
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{"email":"ana@example.com","password":"senha1234"}
+```
+
+```json
+{
+  "tokenType": "Bearer",
+  "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+  "refreshToken": "kM3...",
+  "expiresIn": 900,
+  "user": { "id": "9f2c...", "name": "Ana", "email": "ana@example.com", "role": "ATTENDEE", "createdAt": "..." }
+}
+```
+
+Regras aplicadas:
+
+- `register` aceita `role` opcional (`ATTENDEE` padrão, `ORGANIZER` permitido);
+  `ADMIN` é recusado com `403` — nunca se auto-promove por payload.
+- E-mail duplicado devolve `409` com `code: EMAIL_ALREADY_USED`.
+- E-mail inexistente e senha errada devolvem **a mesma** resposta
+  (`401 INVALID_CREDENTIALS`), sem revelar quem tem conta.
+- Trocar a senha revoga todos os refresh tokens do usuário.
+- Sem token ou token inválido em rota protegida: `401 INVALID_TOKEN`.
 
 ## Contrato planejado
 
 | Método | Endpoint | Papel | Etapa |
 | --- | --- | --- | --- |
-| POST | `/api/auth/register` | público | 2 |
-| POST | `/api/auth/login` | público | 2 |
-| POST | `/api/auth/refresh` | público | 2 |
-| POST | `/api/auth/logout` | autenticado | 2 |
-| GET | `/api/users/me` | autenticado | 2 |
-| PATCH | `/api/users/me` | autenticado | 2 |
+| POST | `/api/auth/register` | público | ✅ |
+| POST | `/api/auth/login` | público | ✅ |
+| POST | `/api/auth/refresh` | público | ✅ |
+| POST | `/api/auth/logout` | autenticado | ✅ |
+| GET | `/api/users/me` | autenticado | ✅ |
+| PATCH | `/api/users/me` | autenticado | ✅ |
+| PATCH | `/api/auth/password` | autenticado | ✅ |
 | GET | `/api/events` | público | 3 |
 | GET | `/api/events/{id}` | público | 3 |
 | POST | `/api/events` | `ORGANIZER` | 3 |
