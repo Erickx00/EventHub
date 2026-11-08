@@ -1,0 +1,8 @@
+
+# <tipo>(<escopo>): <descrição no imperativo, minúscula, sem ponto final>
+#
+# Corpo opcional: o PORQUÊ da mudança, não o como.
+#
+# Rodapé opcional:
+# Refs: #12
+# BREAKING CHANGE: descreva o contrato quebrado
