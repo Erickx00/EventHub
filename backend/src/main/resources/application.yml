@@ -30,6 +30,14 @@ server:
   port: ${SERVER_PORT:8080}
   shutdown: graceful
 
+eventhub:
+  security:
+    jwt:
+      # HS256 exige >= 32 bytes. Em producao SEMPRE defina JWT_SECRET.
+      secret: ${JWT_SECRET:local-development-secret-change-me-32-bytes-minimum}
+      access-ttl: ${JWT_ACCESS_TTL:PT15M}
+    refresh-ttl: ${REFRESH_TOKEN_TTL:P7D}
+
 logging:
   level:
     com.eventhub: INFO
