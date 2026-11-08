@@ -54,6 +54,7 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | [docs/architecture.md](docs/architecture.md) | Camadas, módulos, decisões |
 | [docs/database.md](docs/database.md) | Modelo de dados e estados |
 | [docs/api.md](docs/api.md) | Contrato REST |
+| [docs/AGENTS-AND-SKILLS.md](docs/AGENTS-AND-SKILLS.md) | Quais agents/skills do ECC usar em cada etapa |
 | [COMMITS.md](COMMITS.md) | Convenção de commits |
 
 ## Roadmap
