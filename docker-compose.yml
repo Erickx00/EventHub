@@ -20,5 +20,39 @@ services:
       retries: 10
       start_period: 10s
 
+  # Perfil "full": sobe a stack inteira em containers.
+  #   docker compose --profile full up --build
+  backend:
+    profiles: ["full"]
+    build:
+      context: ./backend
+    container_name: eventhub-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-eventhub}
+      DB_USER: ${POSTGRES_USER:-eventhub}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-eventhub}
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+
+  frontend:
+    profiles: ["full"]
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:8080
+    container_name: eventhub-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
 volumes:
   postgres-data:
