@@ -123,6 +123,19 @@ class AuthServiceTest {
     }
 
     @Test
+    void performsPasswordCheckEvenWhenEmailIsUnknown() {
+        when(users.findByEmail("ninguem@example.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.login("ninguem@example.com", "senha1234"))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("code", ErrorCode.INVALID_CREDENTIALS);
+
+        // Sem esta chamada, o tempo de resposta denunciaria que o e-mail nao existe.
+        verify(passwordEncoder).matches(org.mockito.ArgumentMatchers.eq("senha1234"),
+                org.mockito.ArgumentMatchers.any());
+    }
+
+    @Test
     void refreshRotatesTheToken() {
         UUID userId = UUID.randomUUID();
         RefreshToken stored = RefreshToken.issue(userId, AuthService.hash("token-antigo"), Instant.now().plusSeconds(600));

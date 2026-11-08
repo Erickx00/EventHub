@@ -37,6 +37,12 @@ public class AuthService {
     private final JwtService jwtService;
     private final Duration refreshTtl;
 
+    /**
+     * Hash descartavel usado quando o e-mail nao existe: o login gasta o mesmo
+     * tempo de BCrypt nos dois casos, para nao revelar quem tem conta.
+     */
+    private final String dummyHash;
+
     public AuthService(UserRepository users,
             RefreshTokenRepository refreshTokens,
             PasswordEncoder passwordEncoder,
@@ -47,6 +53,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTtl = refreshTtl;
+        this.dummyHash = passwordEncoder.encode("hash-descartavel-para-tempo-constante");
     }
 
     @Transactional
@@ -64,11 +71,15 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(String email, String rawPassword) {
-        User user = users.findByEmail(User.normalizeEmail(email))
-                .orElseThrow(AuthService::invalidCredentials);
+        User user = users.findByEmail(User.normalizeEmail(email)).orElse(null);
+
+        if (user == null) {
+            // Mesmo custo de BCrypt do caminho valido, mesmo erro: nao revela quem tem conta.
+            passwordEncoder.matches(rawPassword, dummyHash);
+            throw invalidCredentials();
+        }
 
         if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-            // Mesma resposta para e-mail inexistente e senha errada: nao revela quem tem conta.
             throw invalidCredentials();
         }
 
