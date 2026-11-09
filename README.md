@@ -63,7 +63,7 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | --- | --- | --- |
 | 1 | Fundação (Spring Boot, React, Postgres, Flyway, health) | ✅ |
 | 2 | Usuários e autenticação (JWT, BCrypt, papéis) | ✅ |
-| 3 | Gerenciamento de eventos | ⬜ |
+| 3 | Gerenciamento de eventos (CRUD, publicação, filtros, descoberta) | ✅ |
 | 4 | Ingressos e estoque | ⬜ |
 | 5 | Pedidos e pagamentos | ⬜ |
 | 6 | QR Code e check-in | ⬜ |

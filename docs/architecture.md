@@ -102,6 +102,19 @@ Autorização por papel é declarativa (`hasRole`), mas a checagem de **propried
 ("este organizador é dono deste evento?") fica no `Service` e devolve `403`/`404` —
 nunca no frontend e nunca no controller.
 
+## Módulo de eventos
+
+| Decisão | Motivo |
+| --- | --- |
+| Transições no `Event` (publicar/cancelar/editar) | valem para qualquer caso de uso, não para um endpoint |
+| `DELETE` cancela em vez de apagar | pedidos futuros precisam do evento como histórico |
+| Filtros via `Specification` | combinar categoria + cidade + período + nome sem multiplicar métodos de consulta |
+| `PageResponse` próprio | não expor `pageable`/`sort` internos do Spring no contrato |
+| Rascunho alheio responde `404` | não revelar que o evento existe |
+
+Busca e ordenação usam os índices da migração `V3` (`status, start_date`, `organizer_id`,
+`lower(city)`).
+
 ## O que ainda não existe (e por quê)
 
 - Autenticação: entra na etapa 2, junto com a entidade `User`.

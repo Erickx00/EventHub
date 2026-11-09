@@ -39,6 +39,55 @@ Base: `/api`. JSON em tudo. Datas em ISO-8601 UTC (`2027-03-20T12:00:00Z`).
 | PATCH | `/api/auth/password` | autenticado | `204` |
 | GET | `/api/users/me` | autenticado | perfil |
 | PATCH | `/api/users/me` | autenticado | perfil atualizado |
+| GET | `/api/events` | público | página de eventos publicados |
+| GET | `/api/events/{id}` | público | detalhe (rascunho só para dono/ADMIN) |
+| GET | `/api/events/mine` | `ORGANIZER`/`ADMIN` | página com os eventos do organizador |
+| POST | `/api/events` | `ORGANIZER`/`ADMIN` | `201` + `Location` |
+| PUT | `/api/events/{id}` | dono/`ADMIN` | evento atualizado |
+| PATCH | `/api/events/{id}/publish` | dono/`ADMIN` | publica rascunho |
+| PATCH | `/api/events/{id}/unpublish` | dono/`ADMIN` | volta para rascunho |
+| DELETE | `/api/events/{id}` | dono/`ADMIN` | `204` — cancela, não apaga |
+
+### Eventos
+
+Listagem publica só devolve `PUBLISHED`. Filtros combináveis, todos opcionais:
+
+```http
+GET /api/events?category=TECHNOLOGY&city=Campina%20Grande&q=java&from=2027-01-01T00:00:00Z&page=0&size=9
+```
+
+```json
+{
+  "content": [
+    {
+      "id": "9f2c...",
+      "name": "Java Developers Conference",
+      "category": "TECHNOLOGY",
+      "city": "Campina Grande",
+      "startDate": "2027-03-20T09:00:00Z",
+      "status": "PUBLISHED",
+      "organizerId": "1a2b..."
+    }
+  ],
+  "page": 0,
+  "size": 9,
+  "totalElements": 1,
+  "totalPages": 1
+}
+```
+
+Regras:
+
+- `city` compara sem diferenciar maiúsculas; `q` busca no nome; `from`/`to` filtram a data de
+  início.
+- Ordenação padrão: `startDate asc` na busca, `createdAt desc` em `/mine`.
+- O organizador vem **do token**, nunca do corpo.
+- `ATTENDEE` cria evento → `403`.
+- Organizador edita evento de terceiro → `403`.
+- Rascunho de terceiro em `GET /{id}` → `404` (não confirma existência).
+- Publicar um evento que não está em `DRAFT` → `409 EVENT_NOT_PUBLISHABLE`.
+- Editar cancelado/finalizado → `409 EVENT_NOT_EDITABLE`.
+- `DELETE` cancela (`CANCELLED`) e é idempotente; eventos finalizados não podem ser cancelados.
 
 ### Sessão
 
@@ -85,12 +134,14 @@ Regras aplicadas:
 | GET | `/api/users/me` | autenticado | ✅ |
 | PATCH | `/api/users/me` | autenticado | ✅ |
 | PATCH | `/api/auth/password` | autenticado | ✅ |
-| GET | `/api/events` | público | 3 |
-| GET | `/api/events/{id}` | público | 3 |
-| POST | `/api/events` | `ORGANIZER` | 3 |
-| PUT | `/api/events/{id}` | dono | 3 |
-| DELETE | `/api/events/{id}` | dono | 3 |
-| PATCH | `/api/events/{id}/publish` | dono | 3 |
+| GET | `/api/events` | público | ✅ |
+| GET | `/api/events/{id}` | público | ✅ |
+| GET | `/api/events/mine` | `ORGANIZER` | ✅ |
+| POST | `/api/events` | `ORGANIZER` | ✅ |
+| PUT | `/api/events/{id}` | dono | ✅ |
+| DELETE | `/api/events/{id}` | dono | ✅ |
+| PATCH | `/api/events/{id}/publish` | dono | ✅ |
+| PATCH | `/api/events/{id}/unpublish` | dono | ✅ |
 | POST | `/api/events/{id}/ticket-types` | dono | 4 |
 | GET | `/api/events/{id}/ticket-types` | público | 4 |
 | POST | `/api/orders` | `ATTENDEE` | 5 |
