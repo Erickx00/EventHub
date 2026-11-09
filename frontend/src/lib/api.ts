@@ -33,6 +33,50 @@ export interface HealthResponse {
   readonly timestamp: string
 }
 
+export interface EventSummary {
+  readonly id: string
+  readonly name: string
+  readonly description: string | null
+  readonly category: string
+  readonly city: string
+  readonly venue: string | null
+  readonly startDate: string
+  readonly endDate: string
+  readonly status: string
+}
+
+export interface Page<T> {
+  readonly content: readonly T[]
+  readonly page: number
+  readonly size: number
+  readonly totalElements: number
+  readonly totalPages: number
+}
+
+export interface EventQuery {
+  category?: string
+  city?: string
+  q?: string
+  page?: number
+  size?: number
+}
+
+function toQueryString(query: EventQuery): string {
+  const params = new URLSearchParams()
+
+  if (query.category) params.set('category', query.category)
+  if (query.city) params.set('city', query.city)
+  if (query.q) params.set('q', query.q)
+  if (query.page !== undefined) params.set('page', String(query.page))
+  if (query.size !== undefined) params.set('size', String(query.size))
+
+  const serialized = params.toString()
+  return serialized ? `?${serialized}` : ''
+}
+
 export const api = {
   health: () => request<HealthResponse>('/api/health'),
+  events: {
+    list: (query: EventQuery = {}) => request<Page<EventSummary>>(`/api/events${toQueryString(query)}`),
+  },
 }
