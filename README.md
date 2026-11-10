@@ -53,6 +53,7 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | [docs/setup.md](docs/setup.md) | Como rodar localmente, pré-requisitos, troubleshooting |
 | [docs/architecture.md](docs/architecture.md) | Camadas, módulos, decisões |
 | [docs/database.md](docs/database.md) | Modelo de dados e estados |
+| [docs/inventory.md](docs/inventory.md) | Controle de estoque e concorrência |
 | [docs/api.md](docs/api.md) | Contrato REST |
 | [docs/AGENTS-AND-SKILLS.md](docs/AGENTS-AND-SKILLS.md) | Quais agents/skills do ECC usar em cada etapa |
 | [COMMITS.md](COMMITS.md) | Convenção de commits |
@@ -64,7 +65,7 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | 1 | Fundação (Spring Boot, React, Postgres, Flyway, health) | ✅ |
 | 2 | Usuários e autenticação (JWT, BCrypt, papéis) | ✅ |
 | 3 | Gerenciamento de eventos (CRUD, publicação, filtros, descoberta) | ✅ |
-| 4 | Ingressos e estoque | ⬜ |
+| 4 | Ingressos e estoque (baixa atômica, limite por pedido) | ✅ |
 | 5 | Pedidos e pagamentos | ⬜ |
 | 6 | QR Code e check-in | ⬜ |
 | 7 | Dashboard e testes | ⬜ |

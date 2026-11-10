@@ -47,6 +47,46 @@ Base: `/api`. JSON em tudo. Datas em ISO-8601 UTC (`2027-03-20T12:00:00Z`).
 | PATCH | `/api/events/{id}/publish` | dono/`ADMIN` | publica rascunho |
 | PATCH | `/api/events/{id}/unpublish` | dono/`ADMIN` | volta para rascunho |
 | DELETE | `/api/events/{id}` | dono/`ADMIN` | `204` — cancela, não apaga |
+| GET | `/api/events/{id}/ticket-types` | público | tipos de ingresso do evento |
+| POST | `/api/events/{id}/ticket-types` | dono/`ADMIN` | `201` + `Location` |
+| PUT | `/api/ticket-types/{id}` | dono/`ADMIN` | tipo atualizado |
+| DELETE | `/api/ticket-types/{id}` | dono/`ADMIN` | `204` (recusa se já houver venda) |
+
+### Tipos de ingresso
+
+```http
+POST /api/events/9f2c.../ticket-types
+Content-Type: application/json
+
+{
+  "name": "VIP",
+  "description": "Área premium com open bar",
+  "price": 120.00,
+  "totalQuantity": 100,
+  "maxPerOrder": 4,
+  "salesStart": "2026-12-01T00:00:00Z",
+  "salesEnd": "2027-03-19T23:59:59Z"
+}
+```
+
+```json
+{
+  "id": "6b1d...",
+  "eventId": "9f2c...",
+  "name": "VIP",
+  "price": 120.00,
+  "totalQuantity": 100,
+  "availableQuantity": 100,
+  "maxPerOrder": 4,
+  "soldOut": false
+}
+```
+
+- `availableQuantity` só muda por baixa atômica de estoque (`docs/inventory.md`).
+- `soldOut` é derivado (`availableQuantity == 0`).
+- Rascunho de evento alheio responde `404` também aqui.
+- `DELETE` de um tipo com vendas responde `409 TICKET_TYPE_HAS_SALES`.
+- `PUT` pode aumentar o total; reduzir só até o número já vendido.
 
 ### Eventos
 
@@ -142,8 +182,10 @@ Regras aplicadas:
 | DELETE | `/api/events/{id}` | dono | ✅ |
 | PATCH | `/api/events/{id}/publish` | dono | ✅ |
 | PATCH | `/api/events/{id}/unpublish` | dono | ✅ |
-| POST | `/api/events/{id}/ticket-types` | dono | 4 |
-| GET | `/api/events/{id}/ticket-types` | público | 4 |
+| POST | `/api/events/{id}/ticket-types` | dono | ✅ |
+| GET | `/api/events/{id}/ticket-types` | público | ✅ |
+| PUT | `/api/ticket-types/{id}` | dono | ✅ |
+| DELETE | `/api/ticket-types/{id}` | dono | ✅ |
 | POST | `/api/orders` | `ATTENDEE` | 5 |
 | GET | `/api/orders/me` | autenticado | 5 |
 | GET | `/api/orders/{id}` | dono | 5 |
