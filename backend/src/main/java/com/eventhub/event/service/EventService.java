@@ -71,11 +71,31 @@ public class EventService {
      */
     @Transactional(readOnly = true)
     public EventResponse getById(UUID id, AuthPrincipal viewer) {
+        return EventResponse.from(requireVisible(id, viewer));
+    }
+
+    /**
+     * Usado por modulos que precisam do evento (ingressos, por exemplo) sem
+     * duplicar a regra de visibilidade.
+     */
+    @Transactional(readOnly = true)
+    public Event requireVisible(UUID id, AuthPrincipal viewer) {
         Event event = requireEvent(id);
         if (!event.isPubliclyVisible() && !canManage(event, viewer)) {
             throw notFound();
         }
-        return EventResponse.from(event);
+        return event;
+    }
+
+    /**
+     * Carrega o evento e exige que o solicitante possa gerencia-lo. Lanca 404 se
+     * nao existe e 403 se e de outro organizador.
+     */
+    @Transactional(readOnly = true)
+    public Event requireManageable(UUID id, AuthPrincipal principal) {
+        Event event = requireEvent(id);
+        requireOwnership(event, principal);
+        return event;
     }
 
     @Transactional
