@@ -51,6 +51,56 @@ Base: `/api`. JSON em tudo. Datas em ISO-8601 UTC (`2027-03-20T12:00:00Z`).
 | POST | `/api/events/{id}/ticket-types` | dono/`ADMIN` | `201` + `Location` |
 | PUT | `/api/ticket-types/{id}` | dono/`ADMIN` | tipo atualizado |
 | DELETE | `/api/ticket-types/{id}` | dono/`ADMIN` | `204` (recusa se já houver venda) |
+| POST | `/api/orders` | autenticado | `201` + `Location` |
+| GET | `/api/orders/me` | autenticado | página de pedidos |
+| GET | `/api/orders/{id}` | dono | pedido (404 para terceiros) |
+| DELETE | `/api/orders/{id}` | dono | `204` — cancela e devolve estoque |
+| POST | `/api/orders/{id}/payments` | dono | pagamento simulado |
+
+### Pedidos
+
+```http
+POST /api/orders
+Content-Type: application/json
+
+{"eventId": "9f2c...", "items": [{"ticketTypeId": "6b1d...", "quantity": 2}]}
+```
+
+```json
+{
+  "id": "4d7a...",
+  "eventId": "9f2c...",
+  "status": "PENDING",
+  "totalAmount": 240.00,
+  "expiresAt": "2026-11-10T17:15:00Z",
+  "items": [{ "ticketTypeId": "6b1d...", "quantity": 2, "unitPrice": 120.00, "subtotal": 240.00 }]
+}
+```
+
+- Total e preço unitário são calculados no backend, nunca aceitos do cliente.
+- A criação reserva estoque na mesma transação: falha em qualquer item desfaz tudo.
+- `expiresAt` = agora + `ORDER_PAYMENT_TTL` (15 min por padrão).
+- Evento não publicado → `409 EVENT_NOT_PUBLISHED`.
+- Ingresso de outro evento → `400 INVALID_TICKET_TYPE`.
+
+### Pagamento
+
+```http
+POST /api/orders/4d7a.../payments
+Content-Type: application/json
+
+{"method": "PIX", "outcome": "APPROVED"}
+```
+
+```json
+{"id": "aa01...", "orderId": "4d7a...", "status": "APPROVED", "amount": 240.00, "method": "PIX", "paidAt": "2026-11-10T17:02:00Z", "orderStatus": "PAID"}
+```
+
+- `outcome` é controle do **simulador**; um gateway real não aceitaria isso do cliente.
+- `REFUSED` mantém o pedido `PENDING` e registra a tentativa.
+- Pedido vencido → `409 ORDER_EXPIRED` (o job faz a transição e devolve o estoque).
+- Pedido já pago/cancelado → `409 ORDER_NOT_PENDING`.
+- A leitura do pedido usa lock pessimista: dois pagamentos simultâneos não passam os dois.
 
 ### Tipos de ingresso
 
@@ -186,10 +236,11 @@ Regras aplicadas:
 | GET | `/api/events/{id}/ticket-types` | público | ✅ |
 | PUT | `/api/ticket-types/{id}` | dono | ✅ |
 | DELETE | `/api/ticket-types/{id}` | dono | ✅ |
-| POST | `/api/orders` | `ATTENDEE` | 5 |
-| GET | `/api/orders/me` | autenticado | 5 |
-| GET | `/api/orders/{id}` | dono | 5 |
-| POST | `/api/orders/{id}/payments` | dono | 5 |
+| POST | `/api/orders` | `ATTENDEE` | ✅ |
+| GET | `/api/orders/me` | autenticado | ✅ |
+| GET | `/api/orders/{id}` | dono | ✅ |
+| DELETE | `/api/orders/{id}` | dono | ✅ |
+| POST | `/api/orders/{id}/payments` | dono | ✅ |
 | GET | `/api/tickets/me` | autenticado | 6 |
 | POST | `/api/checkins/validate` | `ORGANIZER`/`ADMIN` | 6 |
 | GET | `/api/organizer/dashboard` | `ORGANIZER` | 7 |

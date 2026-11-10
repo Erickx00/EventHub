@@ -115,6 +115,19 @@ nunca no frontend e nunca no controller.
 Busca e ordenação usam os índices da migração `V3` (`status, start_date`, `organizer_id`,
 `lower(city)`).
 
+## Módulo de pedidos
+
+| Decisão | Motivo |
+| --- | --- |
+| Total calculado no servidor | aceitar `total` do cliente permite comprar por R$ 1,00 |
+| Preço congelado em `order_items.unit_price` | mudar o preço depois não reescreve o histórico |
+| Reserva de estoque na mesma transação do pedido | rollback desfaz baixas parciais |
+| `PESSIMISTIC_WRITE` ao pagar | dois cliques simultâneos não pagam duas vezes |
+| Vencido não é mutado no pagamento | mutar e lançar exceção faria o rollback desfazer a expiração |
+| Expiração em job separado | o pedido vencido precisa de uma transição que sobreviva sozinha |
+
+O ciclo completo está em `docs/orders.md`.
+
 ## O que ainda não existe (e por quê)
 
 - Autenticação: entra na etapa 2, junto com a entidade `User`.
