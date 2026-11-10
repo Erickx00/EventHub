@@ -37,6 +37,10 @@ eventhub:
       secret: ${JWT_SECRET:local-development-secret-change-me-32-bytes-minimum}
       access-ttl: ${JWT_ACCESS_TTL:PT15M}
     refresh-ttl: ${REFRESH_TOKEN_TTL:P7D}
+  orders:
+    # Janela para pagar um pedido PENDING antes de expirar e devolver o estoque.
+    payment-ttl: ${ORDER_PAYMENT_TTL:PT15M}
+    expiry-scan-ms: ${ORDER_EXPIRY_SCAN_MS:60000}
 
 logging:
   level:
