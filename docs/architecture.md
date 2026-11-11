@@ -128,6 +128,19 @@ Busca e ordenação usam os índices da migração `V3` (`status, start_date`, `
 
 O ciclo completo está em `docs/orders.md`.
 
+## Módulo de ingressos
+
+| Decisão | Motivo |
+| --- | --- |
+| Um ticket por unidade | cada entrada precisa de QR e check-in próprios |
+| QR carrega só o token | vazar o código não expõe dado pessoal |
+| `TicketIssuance` em vez de `Order` | emissão não acopla o módulo de ingressos ao agregado de pedido |
+| Emissão na transação do pagamento | pagamento aprovado sem ingresso seria estado inconsistente |
+| `UPDATE ... WHERE status='VALID'` | dois check-ins simultâneos não passam os dois |
+| `UNIQUE (ticket_id)` em `check_ins` | rede de segurança no banco |
+
+Detalhes em `docs/tickets.md`.
+
 ## O que ainda não existe (e por quê)
 
 - Autenticação: entra na etapa 2, junto com a entidade `User`.

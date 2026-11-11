@@ -56,6 +56,32 @@ Base: `/api`. JSON em tudo. Datas em ISO-8601 UTC (`2027-03-20T12:00:00Z`).
 | GET | `/api/orders/{id}` | dono | pedido (404 para terceiros) |
 | DELETE | `/api/orders/{id}` | dono | `204` — cancela e devolve estoque |
 | POST | `/api/orders/{id}/payments` | dono | pagamento simulado |
+| GET | `/api/tickets/me` | autenticado | ingressos do usuário |
+| GET | `/api/tickets/{id}` | dono | ingresso |
+| GET | `/api/tickets/{id}/qr` | dono | PNG do QR Code |
+| POST | `/api/checkins/validate` | `ORGANIZER`/`ADMIN` | `200` no primeiro check-in |
+
+### Ingressos e check-in
+
+O QR Code carrega apenas um token opaco de 32 bytes; nada de dado pessoal. Validar duas vezes
+o mesmo ingresso devolve `409 TICKET_ALREADY_USED` — a garantia é um `UPDATE` condicional em
+`tickets.status`, não um `if` em Java (`docs/tickets.md`).
+
+```http
+POST /api/checkins/validate
+Content-Type: application/json
+
+{"qrToken": "kM3x..."}
+```
+
+```json
+{"ticketId": "c1a2...", "eventId": "9f2c...", "checkedAt": "2027-03-20T13:05:00Z", "validatedBy": "7e0f..."}
+```
+
+- token inexistente → `404 INVALID_QR_TOKEN`;
+- quem valida não gerencia o evento → `403 FORBIDDEN`;
+- ingresso já usado → `409 TICKET_ALREADY_USED`;
+- `GET /qr` responde `image/png`.
 
 ### Pedidos
 
@@ -241,8 +267,10 @@ Regras aplicadas:
 | GET | `/api/orders/{id}` | dono | ✅ |
 | DELETE | `/api/orders/{id}` | dono | ✅ |
 | POST | `/api/orders/{id}/payments` | dono | ✅ |
-| GET | `/api/tickets/me` | autenticado | 6 |
-| POST | `/api/checkins/validate` | `ORGANIZER`/`ADMIN` | 6 |
+| GET | `/api/tickets/me` | autenticado | ✅ |
+| GET | `/api/tickets/{id}` | dono | ✅ |
+| GET | `/api/tickets/{id}/qr` | dono | ✅ |
+| POST | `/api/checkins/validate` | `ORGANIZER`/`ADMIN` | ✅ |
 | GET | `/api/organizer/dashboard` | `ORGANIZER` | 7 |
 
 ## Exemplo: criar evento

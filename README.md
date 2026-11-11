@@ -55,6 +55,7 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | [docs/database.md](docs/database.md) | Modelo de dados e estados |
 | [docs/inventory.md](docs/inventory.md) | Controle de estoque e concorrência |
 | [docs/orders.md](docs/orders.md) | Ciclo de vida do pedido, pagamento e expiração |
+| [docs/tickets.md](docs/tickets.md) | Ingresso digital, QR Code e check-in |
 | [docs/api.md](docs/api.md) | Contrato REST |
 | [docs/AGENTS-AND-SKILLS.md](docs/AGENTS-AND-SKILLS.md) | Quais agents/skills do ECC usar em cada etapa |
 | [COMMITS.md](COMMITS.md) | Convenção de commits |
@@ -68,6 +69,6 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | 3 | Gerenciamento de eventos (CRUD, publicação, filtros, descoberta) | ✅ |
 | 4 | Ingressos e estoque (baixa atômica, limite por pedido) | ✅ |
 | 5 | Pedidos e pagamentos (reserva temporária, expiração) | ✅ |
-| 6 | QR Code e check-in | ⬜ |
+| 6 | QR Code e check-in (ingresso único, validação atômica) | ✅ |
 | 7 | Dashboard e testes | ⬜ |
 | 8 | Documentação, CI e deploy | ⬜ |
