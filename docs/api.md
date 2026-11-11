@@ -347,5 +347,13 @@ A checagem de propriedade acontece no `Service`, não no controller e nunca no f
 
 ## OpenAPI
 
-A especificação é gerada a partir do código (springdoc) na etapa 8 e publicada em
-`/swagger-ui.html`. Até lá este documento é o contrato.
+A especificação é **gerada a partir do código** (springdoc 3.2), então documento e implementação não
+divergem:
+
+| Caminho | O que é |
+| --- | --- |
+| `/swagger-ui.html` | interface interativa |
+| `/v3/api-docs` | JSON OpenAPI 3 |
+
+Ambos são públicos (não expõem dado de usuário) e o esquema `bearerAuth` já está declarado: faça
+login, copie o `accessToken` e use **Authorize** na interface.

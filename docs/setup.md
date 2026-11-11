@@ -45,6 +45,8 @@ curl http://localhost:8080/api/health
 # {"status":"UP","service":"eventhub","timestamp":"2026-11-08T20:00:00Z"}
 ```
 
+Documentação interativa: <http://localhost:8080/swagger-ui.html>.
+
 Testes:
 
 ```bash

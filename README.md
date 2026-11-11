@@ -74,4 +74,4 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | 6b | UI de compra: login, checkout e meus ingressos | ✅ |
 | 7 | Dashboard do organizador | ✅ |
 | 7b | Testes de integração (Testcontainers) | ⬜ |
-| 8 | OpenAPI, CI (Postgres no CI) e deploy | 🟡 CI pronto; OpenAPI e deploy pendentes |
+| 8 | OpenAPI, CI com Postgres e deploy | 🟡 OpenAPI e CI prontos; deploy pendente |

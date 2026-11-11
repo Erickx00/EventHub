@@ -45,6 +45,13 @@ eventhub:
     # Fecha eventos cujo fim ja passou (saem da busca publica).
     finish-scan-ms: ${EVENT_FINISH_SCAN_MS:300000}
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
 logging:
   level:
     com.eventhub: INFO
