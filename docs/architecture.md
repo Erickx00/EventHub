@@ -153,8 +153,18 @@ com preço congelado, não há dupla contagem ao cruzar com `order_items`.
 
 ## O que ainda não existe (e por quê)
 
-- Autenticação: entra na etapa 2, junto com a entidade `User`.
-- Tratamento global de erros: só faz sentido quando houver o primeiro caso de uso com falha.
-- Módulos de evento/ingresso/pedido: etapas 3 a 6.
+Dívidas conhecidas, nomeadas de propósito — nenhuma delas é surpresa descoberta em produção:
 
-Documentar o limite é parte do desenho: evita abstração especulativa.
+| Lacuna | Consequência hoje | Caminho |
+| --- | --- | --- |
+| Reembolso | `PaymentStatus.REFUNDED` existe no enum, mas não há fluxo | estorno em `PaymentService` + devolução de estoque |
+| Cancelar evento com ingressos pagos | ingressos continuam válidos para evento cancelado | cancelar ingressos/pedidos do evento em cascata |
+| Transição `FINISHED` | evento passado segue `PUBLISHED` e aparece na busca | job que fecha eventos após `end_date` |
+| Pagamento simulado | o cliente escolhe `outcome` | gateway real atrás de `PaymentGateway` |
+| Frontend | só a descoberta pública; sem login, compra, ingressos ou painel | etapa de UI |
+| OpenAPI | contrato em `docs/api.md`, sem `/swagger-ui` | springdoc quando houver versão estável para Boot 4 |
+| Testes de integração | rodam só no CI, com serviço Postgres | Testcontainers no ambiente local |
+| Proteção de login | sem rate limit nem bloqueio por tentativa | limitador por IP/conta |
+
+O backend está funcionalmente completo para o fluxo principal; o que falta é acabamento e as
+consequências de cancelamento/reembolso, que só fazem sentido junto com a UI de organizador.

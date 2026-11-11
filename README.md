@@ -72,4 +72,4 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | 6 | QR Code e check-in (ingresso único, validação atômica) | ✅ |
 | 7 | Dashboard do organizador | ✅ |
 | 7b | Testes de integração (Testcontainers) | ⬜ |
-| 8 | Documentação, CI e deploy | ⬜ |
+| 8 | OpenAPI, CI (Postgres no CI) e deploy | 🟡 CI pronto; OpenAPI e deploy pendentes |

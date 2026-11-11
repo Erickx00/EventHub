@@ -48,7 +48,7 @@ curl http://localhost:8080/api/health
 Testes:
 
 ```bash
-./mvnw test        # 93 testes unitarios e de slice, sem banco
+./mvnw test        # unitarios e de slice, sem banco
 ```
 
 Teste de schema (migrações + mapeamento JPA) contra um PostgreSQL real:
