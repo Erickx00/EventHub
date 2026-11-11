@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.eventhub.event.service.EventService;
 import com.eventhub.order.entity.Order;
 import com.eventhub.order.entity.OrderStatus;
 import com.eventhub.order.repository.OrderRepository;
@@ -50,6 +51,9 @@ class PaymentServiceTest {
     @Mock
     private TicketService ticketService;
 
+    @Mock
+    private EventService events;
+
     private PaymentService paymentService;
 
     private final UUID userId = UUID.randomUUID();
@@ -58,7 +62,7 @@ class PaymentServiceTest {
 
     @BeforeEach
     void setUp() {
-        paymentService = new PaymentService(orders, payments, new SimulatedPaymentGateway(), ticketService);
+        paymentService = new PaymentService(orders, payments, new SimulatedPaymentGateway(), ticketService, events);
     }
 
     private Order pendingOrder() {
@@ -155,6 +159,23 @@ class PaymentServiceTest {
                 new PaymentRequest(PaymentMethod.PIX, PaymentOutcome.APPROVED), other))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("code", ErrorCode.ORDER_NOT_FOUND);
+    }
+
+    @Test
+    void refusesPaymentWhenEventWasCancelledAfterTheOrderWasOpened() {
+        Order order = pendingOrder();
+        when(orders.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
+        when(events.requireOpenForSales(order.getEventId()))
+                .thenThrow(BusinessException.conflict(ErrorCode.EVENT_NOT_PUBLISHED, "evento cancelado"));
+
+        assertThatThrownBy(() -> paymentService.pay(orderId,
+                new PaymentRequest(PaymentMethod.PIX, PaymentOutcome.APPROVED), attendee))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("code", ErrorCode.EVENT_NOT_PUBLISHED);
+
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        verify(payments, never()).save(any());
+        verify(ticketService, never()).issueFor(any());
     }
 
     @Test

@@ -88,6 +88,21 @@ public class EventService {
     }
 
     /**
+     * Exige um evento apto a receber dinheiro: publicado. Se o organizador
+     * cancelou ou despublicou depois que alguem abriu o pedido, cobrar seria
+     * vender ingresso para um evento que nao acontece.
+     */
+    @Transactional(readOnly = true)
+    public Event requireOpenForSales(UUID id) {
+        Event event = requireEvent(id);
+        if (!event.isPubliclyVisible()) {
+            throw BusinessException.conflict(ErrorCode.EVENT_NOT_PUBLISHED,
+                    "Evento nao esta publicado e nao pode receber pedidos.");
+        }
+        return event;
+    }
+
+    /**
      * Carrega o evento e exige que o solicitante possa gerencia-lo. Lanca 404 se
      * nao existe e 403 se e de outro organizador.
      */

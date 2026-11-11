@@ -55,11 +55,7 @@ public class OrderService {
      */
     @Transactional
     public OrderResponse create(CreateOrderRequest request, AuthPrincipal principal) {
-        Event event = events.requireVisible(request.eventId(), principal);
-        if (!event.isPubliclyVisible()) {
-            throw BusinessException.conflict(ErrorCode.EVENT_NOT_PUBLISHED,
-                    "Somente eventos publicados podem receber pedidos.");
-        }
+        Event event = events.requireOpenForSales(request.eventId());
 
         Instant now = Instant.now();
         Order order = Order.create(principal.userId(), event.getId(), now.plus(paymentTtl));

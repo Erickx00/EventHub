@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eventhub.event.service.EventService;
 import com.eventhub.order.entity.Order;
 import com.eventhub.order.repository.OrderRepository;
 import com.eventhub.payment.dto.PaymentRequest;
@@ -28,13 +29,15 @@ public class PaymentService {
     private final PaymentRepository payments;
     private final PaymentGateway paymentGateway;
     private final TicketService ticketService;
+    private final EventService events;
 
     public PaymentService(OrderRepository orders, PaymentRepository payments, PaymentGateway paymentGateway,
-            TicketService ticketService) {
+            TicketService ticketService, EventService events) {
         this.orders = orders;
         this.payments = payments;
         this.paymentGateway = paymentGateway;
         this.ticketService = ticketService;
+        this.events = events;
     }
 
     /**
@@ -62,6 +65,10 @@ public class PaymentService {
             throw BusinessException.conflict(ErrorCode.ORDER_NOT_PENDING,
                     "Pedido nao esta mais pendente (status atual: " + order.getStatus() + ").");
         }
+
+        // O organizador pode cancelar/despublicar depois que o pedido foi aberto.
+        // Cobrar aqui venderia ingresso para um evento que nao vai acontecer.
+        events.requireOpenForSales(order.getEventId());
 
         PaymentStatus status = paymentGateway.charge(order.getTotalAmount(), request.method(), request.outcome());
 

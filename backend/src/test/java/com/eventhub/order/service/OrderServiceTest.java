@@ -116,7 +116,7 @@ class OrderServiceTest {
     @Test
     void createsOrderWithTotalFromDatabaseAndReservesStock() {
         UUID ticketTypeId = UUID.randomUUID();
-        when(events.requireVisible(eventId, attendee)).thenReturn(publishedEvent());
+        when(events.requireOpenForSales(eventId)).thenReturn(publishedEvent());
         when(ticketTypes.findById(ticketTypeId)).thenReturn(Optional.of(ticketType(new BigDecimal("50.00"))));
         when(orders.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -132,9 +132,8 @@ class OrderServiceTest {
 
     @Test
     void refusesOrderForUnpublishedEvent() {
-        when(events.requireVisible(eventId, attendee))
-                .thenReturn(Event.draft(UUID.randomUUID(), "Rascunho", null, Category.MUSIC, "Recife", null,
-                        START, START.plus(2, ChronoUnit.HOURS)));
+        when(events.requireOpenForSales(eventId))
+                .thenThrow(BusinessException.conflict(ErrorCode.EVENT_NOT_PUBLISHED, "nao publicado"));
 
         assertThatThrownBy(() -> orderService.create(orderWith(UUID.randomUUID(), 1), attendee))
                 .isInstanceOf(BusinessException.class)
@@ -149,7 +148,7 @@ class OrderServiceTest {
         TicketType foreign = TicketType.create(UUID.randomUUID(), "Pista", null, BigDecimal.TEN, 10, 2,
                 SALES_START, SALES_END);
 
-        when(events.requireVisible(eventId, attendee)).thenReturn(publishedEvent());
+        when(events.requireOpenForSales(eventId)).thenReturn(publishedEvent());
         when(ticketTypes.findById(ticketTypeId)).thenReturn(Optional.of(foreign));
 
         assertThatThrownBy(() -> orderService.create(orderWith(ticketTypeId, 1), attendee))
@@ -162,7 +161,7 @@ class OrderServiceTest {
     @Test
     void mergesDuplicateLinesBeforeReserving() {
         UUID ticketTypeId = UUID.randomUUID();
-        when(events.requireVisible(eventId, attendee)).thenReturn(publishedEvent());
+        when(events.requireOpenForSales(eventId)).thenReturn(publishedEvent());
         when(ticketTypes.findById(ticketTypeId)).thenReturn(Optional.of(ticketType(new BigDecimal("50.00"))));
         when(orders.save(any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -180,7 +179,7 @@ class OrderServiceTest {
     @Test
     void doesNotPersistOrderWhenStockIsGone() {
         UUID ticketTypeId = UUID.randomUUID();
-        when(events.requireVisible(eventId, attendee)).thenReturn(publishedEvent());
+        when(events.requireOpenForSales(eventId)).thenReturn(publishedEvent());
         when(ticketTypes.findById(ticketTypeId)).thenReturn(Optional.of(ticketType(new BigDecimal("50.00"))));
         org.mockito.Mockito.doThrow(BusinessException.conflict(ErrorCode.TICKET_SOLD_OUT, "sem estoque"))
                 .when(ticketTypeService).reserve(ticketTypeId, 2);

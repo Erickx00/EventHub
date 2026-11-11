@@ -55,6 +55,10 @@ transação faria o rollback desfazer a própria expiração. O pagamento apenas
 
 Pagamento recusado **mantém o pedido em `PENDING`**, para nova tentativa dentro do prazo.
 
+**Evento cancelado ou despublicado depois do pedido aberto recusa o pagamento** com
+`409 EVENT_NOT_PUBLISHED`. Sem essa checagem, um organizador que cancela o evento ainda receberia
+dinheiro de pedidos abertos minutos antes — o pior tipo de inconsistência: pago, sem evento.
+
 ## Expiração
 
 `OrderExpirationJob` roda a cada `eventhub.orders.expiry-scan-ms` (60s por padrão), busca

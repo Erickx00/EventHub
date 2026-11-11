@@ -158,6 +158,7 @@ Content-Type: application/json
 
 - `outcome` é controle do **simulador**; um gateway real não aceitaria isso do cliente.
 - `REFUSED` mantém o pedido `PENDING` e registra a tentativa.
+- Evento cancelado/despublicado depois do pedido → `409 EVENT_NOT_PUBLISHED` (não cobra).
 - Pedido vencido → `409 ORDER_EXPIRED` (o job faz a transição e devolve o estoque).
 - Pedido já pago/cancelado → `409 ORDER_NOT_PENDING`.
 - A leitura do pedido usa lock pessimista: dois pagamentos simultâneos não passam os dois.
