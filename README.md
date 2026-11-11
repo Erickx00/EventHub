@@ -48,9 +48,12 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 
 ## Deploy
 
-API + PostgreSQL no Render, frontend na Vercel — o repositório já traz o blueprint
-([render.yaml](render.yaml)) e a configuração da Vercel ([frontend/vercel.json](frontend/vercel.json)).
-Passo a passo, variáveis e ressalvas do plano gratuito em [docs/deploy.md](docs/deploy.md).
+Gratuito e sem cartão: PostgreSQL no **Neon**, API no **Render** (Docker) e frontend na **Vercel**.
+O repositório traz o blueprint da API ([render.yaml](render.yaml)) e a configuração da Vercel
+([frontend/vercel.json](frontend/vercel.json)).
+
+Passo a passo, variáveis, limites dos planos gratuitos e um caminho alternativo (banco no próprio
+Render) em [docs/deploy.md](docs/deploy.md).
 
 ## Documentação
 

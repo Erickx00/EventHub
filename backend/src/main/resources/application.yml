@@ -3,7 +3,8 @@ spring:
     name: eventhub
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:eventhub}
+    # DB_PARAMS permite anexar query string, ex.: ?sslmode=require (Neon, Supabase).
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:eventhub}${DB_PARAMS:}
     username: ${DB_USER:eventhub}
     password: ${DB_PASSWORD:eventhub}
     hikari:
