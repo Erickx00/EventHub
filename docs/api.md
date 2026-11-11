@@ -60,6 +60,35 @@ Base: `/api`. JSON em tudo. Datas em ISO-8601 UTC (`2027-03-20T12:00:00Z`).
 | GET | `/api/tickets/{id}` | dono | ingresso |
 | GET | `/api/tickets/{id}/qr` | dono | PNG do QR Code |
 | POST | `/api/checkins/validate` | `ORGANIZER`/`ADMIN` | `200` no primeiro check-in |
+| GET | `/api/organizer/dashboard` | `ORGANIZER`/`ADMIN` | números consolidados do organizador |
+| GET | `/api/organizer/dashboard/events/{id}` | dono/`ADMIN` | números de um evento |
+
+### Dashboard
+
+```http
+GET /api/organizer/dashboard
+Authorization: Bearer ...
+```
+
+```json
+{
+  "totalEvents": 4,
+  "publishedEvents": 3,
+  "ticketsSold": 120,
+  "ticketsAvailable": 380,
+  "revenue": 14500.00,
+  "checkIns": 87,
+  "uniqueAttendees": 110
+}
+```
+
+- `revenue` soma apenas pedidos `PAID` dos eventos do organizador (total já congelado por item,
+  então não há dupla contagem).
+- `ticketsAvailable` é o estoque atual de cada tipo de ingresso.
+- `uniqueAttendees` conta pessoas distintas com ingresso, não ingressos.
+- `GET /events/{id}` devolve o mesmo recorte para um evento; responde `403` se o evento é de
+  outro organizador e `404` se não existe.
+- `ATTENDEE` recebe `403`.
 
 ### Ingressos e check-in
 
@@ -271,7 +300,7 @@ Regras aplicadas:
 | GET | `/api/tickets/{id}` | dono | ✅ |
 | GET | `/api/tickets/{id}/qr` | dono | ✅ |
 | POST | `/api/checkins/validate` | `ORGANIZER`/`ADMIN` | ✅ |
-| GET | `/api/organizer/dashboard` | `ORGANIZER` | 7 |
+| GET | `/api/organizer/dashboard` | `ORGANIZER` | ✅ |
 
 ## Exemplo: criar evento
 

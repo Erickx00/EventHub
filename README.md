@@ -70,5 +70,6 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | 4 | Ingressos e estoque (baixa atômica, limite por pedido) | ✅ |
 | 5 | Pedidos e pagamentos (reserva temporária, expiração) | ✅ |
 | 6 | QR Code e check-in (ingresso único, validação atômica) | ✅ |
-| 7 | Dashboard e testes | ⬜ |
+| 7 | Dashboard do organizador | ✅ |
+| 7b | Testes de integração (Testcontainers) | ⬜ |
 | 8 | Documentação, CI e deploy | ⬜ |

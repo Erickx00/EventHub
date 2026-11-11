@@ -141,6 +141,16 @@ O ciclo completo está em `docs/orders.md`.
 
 Detalhes em `docs/tickets.md`.
 
+## Módulo de dashboard
+
+Somente leitura, sem tabela própria: cada número vem de uma consulta de agregação no repositório
+do módulo dono do dado (`TicketRepository`, `OrderRepository`, `TicketTypeRepository`,
+`CheckInRepository`). Nada de denormalizar contadores agora — se a performance pedir, o caminho é
+uma view materializada, não um contador mantido na mão.
+
+Receita usa `orders.total_amount` de pedidos `PAID`; como o total do pedido já é a soma dos itens
+com preço congelado, não há dupla contagem ao cruzar com `order_items`.
+
 ## O que ainda não existe (e por quê)
 
 - Autenticação: entra na etapa 2, junto com a entidade `User`.
