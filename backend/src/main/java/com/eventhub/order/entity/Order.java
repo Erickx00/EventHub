@@ -109,6 +109,19 @@ public class Order {
         this.status = OrderStatus.CANCELLED;
     }
 
+    /**
+     * Cancelamento por cancelamento do evento: aqui o pedido ja foi pago, e o
+     * dinheiro precisa voltar. Nao e o mesmo caminho de `cancel()`, que so existe
+     * para PENDING.
+     */
+    public void cancelAfterPayment() {
+        if (status != OrderStatus.PAID) {
+            throw BusinessException.conflict(ErrorCode.ORDER_NOT_PENDING,
+                    "Somente pedidos pagos podem ser cancelados desta forma (status atual: " + status + ").");
+        }
+        this.status = OrderStatus.CANCELLED;
+    }
+
     public void expire() {
         requirePending();
         this.status = OrderStatus.EXPIRED;

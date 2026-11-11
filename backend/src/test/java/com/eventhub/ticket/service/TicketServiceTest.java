@@ -186,6 +186,13 @@ class TicketServiceTest {
     }
 
     @Test
+    void cancelsAllValidTicketsOfEvent() {
+        when(tickets.cancelByEvent(eventId, TicketStatus.CANCELLED, TicketStatus.VALID)).thenReturn(3);
+
+        assertThat(ticketService.cancelForEvent(eventId)).isEqualTo(3);
+    }
+
+    @Test
     void ticketKeepsIssuedTimestamp() {
         Ticket ticket = ticketOwnedBy(userId);
         setField(ticket, "issuedAt", Instant.parse("2026-11-10T10:00:00Z"));

@@ -53,4 +53,20 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
     @Query("select count(distinct t.userId) from Ticket t where t.eventId = :eventId")
     long countDistinctAttendeesByEvent(@Param("eventId") UUID eventId);
+
+    /**
+     * Cancela em lote todos os ingressos validos do evento. Usado quando o
+     * organizador cancela o evento: nenhum ingresso pode continuar valendo.
+     *
+     * @return quantidade de ingressos cancelados
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            update Ticket t
+               set t.status = :cancelled
+             where t.eventId = :eventId
+               and t.status = :valid
+            """)
+    int cancelByEvent(@Param("eventId") UUID eventId, @Param("cancelled") TicketStatus cancelled,
+            @Param("valid") TicketStatus valid);
 }

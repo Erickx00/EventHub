@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +47,9 @@ class EventServiceTest {
     @Mock
     private EventRepository events;
 
+    @Mock
+    private org.springframework.context.ApplicationEventPublisher publisher;
+
     private EventService eventService;
 
     private final UUID organizerId = UUID.randomUUID();
@@ -53,7 +57,7 @@ class EventServiceTest {
 
     @BeforeEach
     void setUp() {
-        eventService = new EventService(events);
+        eventService = new EventService(events, publisher);
     }
 
     private CreateEventRequest createRequest() {
@@ -165,6 +169,20 @@ class EventServiceTest {
         eventService.cancel(id, organizer);
 
         assertThat(event.getStatus()).isEqualTo(EventStatus.CANCELLED);
+        // A cascata roda uma vez so. O matcher precisa do tipo concreto: um `any()`
+        // cru resolve para a sobrecarga publishEvent(ApplicationEvent).
+        verify(publisher, times(1)).publishEvent(any(com.eventhub.event.domain.EventCancelled.class));
+    }
+
+    @Test
+    void publishesDomainEventSoDependentsCanReact() {
+        UUID id = UUID.randomUUID();
+        Event event = draftOwnedByOrganizer();
+        when(events.findById(id)).thenReturn(Optional.of(event));
+
+        eventService.cancel(id, organizer);
+
+        verify(publisher).publishEvent(any(com.eventhub.event.domain.EventCancelled.class));
     }
 
     @Test

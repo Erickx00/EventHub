@@ -5,17 +5,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eventhub.event.domain.EventCancelled;
 import com.eventhub.event.dto.CreateEventRequest;
 import com.eventhub.event.dto.EventResponse;
 import com.eventhub.event.dto.UpdateEventRequest;
 import com.eventhub.event.entity.Category;
 import com.eventhub.event.entity.Event;
+import com.eventhub.event.entity.EventStatus;
 import com.eventhub.event.repository.EventRepository;
 import com.eventhub.event.repository.EventSpecifications;
 import com.eventhub.security.AuthPrincipal;
@@ -28,9 +31,11 @@ import com.eventhub.user.entity.Role;
 public class EventService {
 
     private final EventRepository events;
+    private final ApplicationEventPublisher publisher;
 
-    public EventService(EventRepository events) {
+    public EventService(EventRepository events, ApplicationEventPublisher publisher) {
         this.events = events;
+        this.publisher = publisher;
     }
 
     @Transactional(readOnly = true)
@@ -166,7 +171,16 @@ public class EventService {
     public void cancel(UUID id, AuthPrincipal principal) {
         Event event = requireEvent(id);
         requireOwnership(event, principal);
+
+        if (event.getStatus() == EventStatus.CANCELLED) {
+            return;
+        }
+
         event.cancel();
+
+        // Publicado na mesma transacao: se o cancelamento da cascata falhar,
+        // o evento nao fica cancelado com pedidos vivos.
+        publisher.publishEvent(EventCancelled.now(event.getId()));
     }
 
     private Event requireEvent(UUID id) {

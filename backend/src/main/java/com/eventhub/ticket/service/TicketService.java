@@ -103,6 +103,15 @@ public class TicketService {
                 checkIn.getValidatedBy());
     }
 
+    /**
+     * Invalida todos os ingressos validos do evento. Chamado quando o evento e
+     * cancelado: ingresso de evento cancelado nao pode passar na portaria.
+     */
+    @Transactional
+    public int cancelForEvent(UUID eventId) {
+        return tickets.cancelByEvent(eventId, TicketStatus.CANCELLED, TicketStatus.VALID);
+    }
+
     private Ticket requireOwned(UUID id, AuthPrincipal principal) {
         Ticket ticket = tickets.findById(id)
                 .orElseThrow(() -> BusinessException.notFound(ErrorCode.TICKET_NOT_FOUND, "Ingresso nao encontrado."));

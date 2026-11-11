@@ -59,6 +59,27 @@ Pagamento recusado **mantém o pedido em `PENDING`**, para nova tentativa dentro
 `409 EVENT_NOT_PUBLISHED`. Sem essa checagem, um organizador que cancela o evento ainda receberia
 dinheiro de pedidos abertos minutos antes — o pior tipo de inconsistência: pago, sem evento.
 
+## Cancelamento do evento
+
+Quando o organizador cancela o evento, `EventService` publica `EventCancelled` **na mesma
+transação**. `EventCancelledListener` reage:
+
+| Pedido | O que acontece |
+| --- | --- |
+| `PENDING` | vira `CANCELLED` e o estoque reservado volta |
+| `PAID` | vira `CANCELLED`, registra `Payment` `REFUNDED` e o ingresso é invalidado |
+| `EXPIRED`/`CANCELLED` | nada a fazer |
+
+Todos os ingressos `VALID` do evento passam a `CANCELLED` em um único `UPDATE`, então ingresso de
+evento cancelado não passa na portaria.
+
+Por que evento de domínio e não chamada direta: `EventService -> OrderService -> TicketService ->
+EventService` fecharia um ciclo de beans. O evento inverte a dependência e mantém o módulo de
+eventos sem conhecer pedidos, ingressos ou pagamentos.
+
+Se a cascata falhar, a transação inteira reverte — o evento **não** fica cancelado com pedidos
+vivos, que é o estado impossível de consertar depois.
+
 ## Expiração
 
 `OrderExpirationJob` roda a cada `eventhub.orders.expiry-scan-ms` (60s por padrão), busca

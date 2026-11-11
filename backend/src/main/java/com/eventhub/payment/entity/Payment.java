@@ -68,6 +68,14 @@ public class Payment {
         return new Payment(orderId, amount, PaymentStatus.REFUSED, method, null);
     }
 
+    /**
+     * Estorno registrado como nova linha: o historico mostra aprovacao e devolucao,
+     * em vez de reescrever o passado.
+     */
+    public static Payment refunded(UUID orderId, BigDecimal amount, PaymentMethod method) {
+        return new Payment(orderId, amount, PaymentStatus.REFUNDED, method, null);
+    }
+
     public boolean isApproved() {
         return status == PaymentStatus.APPROVED;
     }

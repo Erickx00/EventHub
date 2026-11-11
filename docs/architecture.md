@@ -157,8 +157,7 @@ Dívidas conhecidas, nomeadas de propósito — nenhuma delas é surpresa descob
 
 | Lacuna | Consequência hoje | Caminho |
 | --- | --- | --- |
-| Reembolso | `PaymentStatus.REFUNDED` existe no enum, mas não há fluxo | estorno em `PaymentService` + devolução de estoque |
-| Cancelar evento com ingressos pagos | ingressos continuam válidos para evento cancelado | cancelar ingressos/pedidos do evento em cascata |
+| Cancelamento de evento | ✅ pedidos pendentes, pagos (com estorno) e ingressos são tratados | feito |
 | Transição `FINISHED` | evento passado segue `PUBLISHED` e aparece na busca | job que fecha eventos após `end_date` |
 | Pagamento simulado | o cliente escolhe `outcome` | gateway real atrás de `PaymentGateway` |
 | Frontend | só a descoberta pública; sem login, compra, ingressos ou painel | etapa de UI |

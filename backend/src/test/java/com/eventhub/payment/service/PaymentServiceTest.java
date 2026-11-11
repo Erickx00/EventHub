@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -176,6 +177,35 @@ class PaymentServiceTest {
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
         verify(payments, never()).save(any());
         verify(ticketService, never()).issueFor(any());
+    }
+
+    @Test
+    void registersRefundForCancelledOrder() {
+        Order order = pendingOrder();
+        order.markPaid();
+        order.cancelAfterPayment();
+
+        when(payments.findAllByOrderIdOrderByCreatedAtAsc(any())).thenReturn(List.of(
+                Payment.approved(order.getId(), new BigDecimal("100.00"), PaymentMethod.CREDIT_CARD, Instant.now())));
+
+        paymentService.refund(order);
+
+        ArgumentCaptor<Payment> saved = ArgumentCaptor.forClass(Payment.class);
+        verify(payments).save(saved.capture());
+        assertThat(saved.getValue().getStatus()).isEqualTo(PaymentStatus.REFUNDED);
+        assertThat(saved.getValue().getMethod()).isEqualTo(PaymentMethod.CREDIT_CARD);
+        assertThat(saved.getValue().getAmount()).isEqualByComparingTo("100.00");
+    }
+
+    @Test
+    void refusesRefundForOrderThatIsNotCancelled() {
+        Order order = pendingOrder();
+
+        assertThatThrownBy(() -> paymentService.refund(order))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("code", ErrorCode.ORDER_NOT_PENDING);
+
+        verify(payments, never()).save(any());
     }
 
     @Test

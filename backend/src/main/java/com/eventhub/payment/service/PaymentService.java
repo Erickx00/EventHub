@@ -9,10 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.eventhub.event.service.EventService;
 import com.eventhub.order.entity.Order;
+import com.eventhub.order.entity.OrderStatus;
 import com.eventhub.order.repository.OrderRepository;
 import com.eventhub.payment.dto.PaymentRequest;
 import com.eventhub.payment.dto.PaymentResponse;
 import com.eventhub.payment.entity.Payment;
+import com.eventhub.payment.entity.PaymentMethod;
 import com.eventhub.payment.entity.PaymentStatus;
 import com.eventhub.payment.gateway.PaymentGateway;
 import com.eventhub.payment.repository.PaymentRepository;
@@ -84,6 +86,26 @@ public class PaymentService {
         }
 
         return PaymentResponse.from(payment, order.getStatus());
+    }
+
+    /**
+     * Estorna o valor do pedido. Registra uma nova linha REFUNDED em vez de
+     * reescrever a aprovacao, para o historico continuar auditavel.
+     */
+    @Transactional
+    public void refund(Order order) {
+        if (order.getStatus() != OrderStatus.CANCELLED) {
+            throw BusinessException.conflict(ErrorCode.ORDER_NOT_PENDING,
+                    "Estorno exige pedido cancelado (status atual: " + order.getStatus() + ").");
+        }
+
+        PaymentMethod method = payments.findAllByOrderIdOrderByCreatedAtAsc(order.getId()).stream()
+                .filter(Payment::isApproved)
+                .reduce((first, second) -> second)
+                .map(Payment::getMethod)
+                .orElse(PaymentMethod.PIX);
+
+        payments.save(Payment.refunded(order.getId(), order.getTotalAmount(), method));
     }
 
     /**

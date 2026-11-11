@@ -32,6 +32,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     List<Order> findAllByStatusAndExpiresAtBefore(OrderStatus status, Instant now);
 
+    List<Order> findAllByEventIdAndStatus(UUID eventId, OrderStatus status);
+
     /**
      * Receita = soma do total de pedidos PAID dos eventos do organizador. O
      * total ja e a soma dos itens com preco congelado, entao nao ha dupla
