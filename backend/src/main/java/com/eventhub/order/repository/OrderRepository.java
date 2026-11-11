@@ -1,5 +1,6 @@
 package com.eventhub.order.repository;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -30,4 +31,26 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Page<Order> findAllByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
 
     List<Order> findAllByStatusAndExpiresAtBefore(OrderStatus status, Instant now);
+
+    /**
+     * Receita = soma do total de pedidos PAID dos eventos do organizador. O
+     * total ja e a soma dos itens com preco congelado, entao nao ha dupla
+     * contagem.
+     */
+    @Query("""
+            select coalesce(sum(o.totalAmount), 0)
+              from Order o, Event e
+             where o.eventId = e.id
+               and e.organizerId = :organizerId
+               and o.status = :status
+            """)
+    BigDecimal sumRevenueByOrganizer(@Param("organizerId") UUID organizerId, @Param("status") OrderStatus status);
+
+    @Query("""
+            select coalesce(sum(o.totalAmount), 0)
+              from Order o
+             where o.eventId = :eventId
+               and o.status = :status
+            """)
+    BigDecimal sumRevenueByEvent(@Param("eventId") UUID eventId, @Param("status") OrderStatus status);
 }

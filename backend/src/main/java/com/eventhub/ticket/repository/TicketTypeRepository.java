@@ -44,4 +44,15 @@ public interface TicketTypeRepository extends JpaRepository<TicketType, UUID> {
                and t.availableQuantity + :quantity <= t.totalQuantity
             """)
     int releaseStock(@Param("id") UUID id, @Param("quantity") int quantity);
+
+    @Query("""
+            select coalesce(sum(tt.availableQuantity), 0)
+              from TicketType tt, Event e
+             where tt.eventId = e.id
+               and e.organizerId = :organizerId
+            """)
+    long sumAvailableByOrganizer(@Param("organizerId") UUID organizerId);
+
+    @Query("select coalesce(sum(tt.availableQuantity), 0) from TicketType tt where tt.eventId = :eventId")
+    long sumAvailableByEvent(@Param("eventId") UUID eventId);
 }

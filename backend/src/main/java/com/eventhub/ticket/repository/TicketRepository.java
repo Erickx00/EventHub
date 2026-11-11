@@ -32,4 +32,25 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
                and t.status = :valid
             """)
     int markUsed(@Param("id") UUID id, @Param("used") TicketStatus used, @Param("valid") TicketStatus valid);
+
+    @Query("""
+            select count(t)
+              from Ticket t, Event e
+             where t.eventId = e.id
+               and e.organizerId = :organizerId
+            """)
+    long countByOrganizer(@Param("organizerId") UUID organizerId);
+
+    @Query("""
+            select count(distinct t.userId)
+              from Ticket t, Event e
+             where t.eventId = e.id
+               and e.organizerId = :organizerId
+            """)
+    long countDistinctAttendeesByOrganizer(@Param("organizerId") UUID organizerId);
+
+    long countByEventId(UUID eventId);
+
+    @Query("select count(distinct t.userId) from Ticket t where t.eventId = :eventId")
+    long countDistinctAttendeesByEvent(@Param("eventId") UUID eventId);
 }
