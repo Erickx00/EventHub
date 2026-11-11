@@ -1,6 +1,7 @@
 package com.eventhub.payment.service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -17,6 +18,8 @@ import com.eventhub.payment.repository.PaymentRepository;
 import com.eventhub.security.AuthPrincipal;
 import com.eventhub.shared.exception.BusinessException;
 import com.eventhub.shared.exception.ErrorCode;
+import com.eventhub.ticket.dto.TicketIssuance;
+import com.eventhub.ticket.service.TicketService;
 
 @Service
 public class PaymentService {
@@ -24,11 +27,14 @@ public class PaymentService {
     private final OrderRepository orders;
     private final PaymentRepository payments;
     private final PaymentGateway paymentGateway;
+    private final TicketService ticketService;
 
-    public PaymentService(OrderRepository orders, PaymentRepository payments, PaymentGateway paymentGateway) {
+    public PaymentService(OrderRepository orders, PaymentRepository payments, PaymentGateway paymentGateway,
+            TicketService ticketService) {
         this.orders = orders;
         this.payments = payments;
         this.paymentGateway = paymentGateway;
+        this.ticketService = ticketService;
     }
 
     /**
@@ -67,8 +73,25 @@ public class PaymentService {
 
         if (payment.isApproved()) {
             order.markPaid();
+            issueTickets(order);
         }
 
         return PaymentResponse.from(payment, order.getStatus());
+    }
+
+    /**
+     * Um ingresso por unidade comprada. A emissao fica na mesma transacao do
+     * pagamento: se falhar, o pedido nao fica pago sem ingressos.
+     */
+    private void issueTickets(Order order) {
+        List<TicketIssuance.Line> lines = order.getItems().stream()
+                .map(item -> new TicketIssuance.Line(item.getId(), item.getTicketTypeId(), item.getQuantity()))
+                .toList();
+
+        ticketService.issueFor(new TicketIssuance(
+                order.getId(),
+                order.getUserId(),
+                order.getEventId(),
+                lines));
     }
 }
