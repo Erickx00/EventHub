@@ -46,6 +46,12 @@ cd frontend && npm install && npm run dev
 
 Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 
+## Deploy
+
+API + PostgreSQL no Render, frontend na Vercel — o repositório já traz o blueprint
+([render.yaml](render.yaml)) e a configuração da Vercel ([frontend/vercel.json](frontend/vercel.json)).
+Passo a passo, variáveis e ressalvas do plano gratuito em [docs/deploy.md](docs/deploy.md).
+
 ## Documentação
 
 | Documento | Conteúdo |
@@ -57,6 +63,7 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | [docs/orders.md](docs/orders.md) | Ciclo de vida do pedido, pagamento e expiração |
 | [docs/tickets.md](docs/tickets.md) | Ingresso digital, QR Code e check-in |
 | [docs/frontend.md](docs/frontend.md) | Rotas, sessão no cliente e fluxo de compra |
+| [docs/deploy.md](docs/deploy.md) | Deploy no Render + Vercel, variáveis e troubleshooting |
 | [docs/api.md](docs/api.md) | Contrato REST |
 | [docs/AGENTS-AND-SKILLS.md](docs/AGENTS-AND-SKILLS.md) | Quais agents/skills do ECC usar em cada etapa |
 | [COMMITS.md](COMMITS.md) | Convenção de commits |
