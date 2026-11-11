@@ -1,7 +1,8 @@
 # Deploy
 
-Arquitetura: **API + PostgreSQL no Render**, **frontend na Vercel**. É o caminho mais barato
-(R$ 0 com as ressalvas de plano gratuito abaixo) e não exige mexer em infraestrutura.
+Arquitetura: **API + PostgreSQL no Render**, **frontend na Vercel**. Custo: o banco usa o plano
+pago `basic-256mb` (o gratuito do Render expira em ~30 dias) e o web service fica no plano
+gratuito, com o cold start descrito no fim.
 
 ```
 navegador
@@ -87,12 +88,22 @@ como participante → comprar → ver o QR Code.
 | `EVENT_FINISH_SCAN_MS` | Render | não | `300000` |
 | `VITE_API_URL` | Vercel | sim | vazio (usa proxy do Vite em dev) |
 
-## Ressalvas do plano gratuito
+## Planos e custo
 
-- **Web service dorme** após ~15 min sem tráfego; a primeira requisição leva ~30 s (cold start).
-  Para demo em entrevista, abra o site 1 minuto antes.
-- **PostgreSQL free expira** em ~30 dias no Render. Para manter, faça upgrade do banco ou exporte
-  e recrie. O `render.yaml` fixa `plan: free` — troque para `basic-256mb` se quiser permanência.
+| Recurso | Plano | Consequência |
+| --- | --- | --- |
+| PostgreSQL | `basic-256mb` (pago) | não expira; storage e conexões compatíveis com o projeto |
+| Web service | `free` | dorme após ~15 min sem tráfego, com cold start de ~30 s |
+| Frontend (Vercel) | Hobby | estático, sem custo |
+
+O banco foi para plano pago de propósito: o PostgreSQL gratuito do Render é apagado após ~30 dias,
+e um portfólio não pode ter o link quebrado no mês seguinte. Se quiser eliminar também o cold
+start, troque `plan: free` do `eventhub-api` por `starter` no `render.yaml`.
+
+Ressalva do plano gratuito restante:
+
+- **Web service dorme** após ~15 min sem tráfego; a primeira requisição leva ~30 s. Para demo em
+  entrevista, abra o site 1 minuto antes.
 - Build do backend no Render é lento porque recompila o Maven a cada deploy; o `Dockerfile` já
   separa `dependency:go-offline` para aproveitar cache.
 
