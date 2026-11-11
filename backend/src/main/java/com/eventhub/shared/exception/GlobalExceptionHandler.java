@@ -9,9 +9,13 @@ import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.eventhub.shared.web.RequestIdFilter;
 
@@ -25,6 +29,25 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusiness(BusinessException ex, HttpServletRequest request) {
         return build(ex.getStatus(), ex.getCode(), ex.getMessage(), request);
+    }
+
+    /**
+     * @PreAuthorize lanca esta excecao dentro do controller, depois da cadeia de
+     * filtros. Sem um handler especifico, o catch-all de Exception a converteria
+     * em 500 — um participante tentando criar evento receberia "erro interno" em
+     * vez de 403.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        return build(HttpStatus.FORBIDDEN, ErrorCode.FORBIDDEN, "Acesso negado.", request);
+    }
+
+    /**
+     * Mesmo motivo: rota com @PreAuthorize acessada sem token.
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAuthentication(AuthenticationException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNAUTHORIZED, ErrorCode.INVALID_TOKEN, "Autenticacao necessaria.", request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -42,6 +65,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException ex, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, "Corpo da requisicao invalido.", request);
+    }
+
+    /**
+     * Rota inexistente chega aqui como NoResourceFoundException. Sem este handler,
+     * o catch-all de Exception responderia 500 para qualquer URL digitada errada.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiError> handleNoResource(NoResourceFoundException ex, HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Recurso nao encontrado.", request);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ApiError> handleNoHandler(NoHandlerFoundException ex, HttpServletRequest request) {
+        return build(HttpStatus.NOT_FOUND, ErrorCode.NOT_FOUND, "Recurso nao encontrado.", request);
     }
 
     @ExceptionHandler(Exception.class)
