@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Bloqueia chaves privadas e arquivos de ambiente no commit.
+# Instalar com: git config core.hooksPath .githooks
+#
+# .env.example e .env.sample sao permitidos de proposito: sao documentacao.
+
+blocked=$(git diff --cached --name-only --diff-filter=ACM \
+    | grep -E '(^|/)(\.env|\.env\.(local|dev|development|prod|production|test|staging)|id_rsa|id_ed25519|.*\.pem|.*\.p12|.*\.p8)$' \
+    | grep -vE '(^|/)\.env\.(example|sample)$')
+
+if [ -n "$blocked" ]; then
+    echo "" >&2
+    echo "  commit recusado: arquivo sensivel no stage" >&2
+    echo "$blocked" | sed 's/^/    /' >&2
+    echo "" >&2
+    echo "  remova do stage: git restore --staged <arquivo>" >&2
+    echo "" >&2
+    exit 1
+fi
+
+exit 0

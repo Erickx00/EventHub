@@ -60,6 +60,26 @@ Sem escopo quando a mudança é global (`chore: add editorconfig`).
 git config commit.template .gitmessage.txt
 ```
 
+## Hooks que verificam a convenção
+
+O repositório traz dois hooks em `.githooks/`. Eles são **opt-in** — ativar é um comando:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+| Hook | Faz |
+| --- | --- |
+| `pre-commit` | recusa `git add` de `.env`, `.env.local`, chaves privadas (`.pem`, `.p12`, `.p8`, `id_rsa`) |
+| `commit-msg` | recusa mensagem fora do padrão `tipo(escopo): descrição` |
+
+`.env.example` e `.env.sample` passam de propósito: são documentação.
+
+Pular uma vez, quando necessário: `git commit --no-verify`.
+
+Em ambiente restrito onde o `sh` do Git não consegue rodar, o hook falha antes da mensagem ser
+avaliada — nesse caso não ative o `core.hooksPath`; valide pelo `COMMITS.md`.
+
 ## Exemplos por etapa
 
 **Etapa 1 — Fundação**
