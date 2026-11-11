@@ -48,8 +48,22 @@ curl http://localhost:8080/api/health
 Testes:
 
 ```bash
+./mvnw test        # 93 testes unitarios e de slice, sem banco
+```
+
+Teste de schema (migrações + mapeamento JPA) contra um PostgreSQL real:
+
+```bash
+docker compose up -d
+IT_POSTGRES=true \
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/eventhub \
+SPRING_DATASOURCE_USERNAME=eventhub \
+SPRING_DATASOURCE_PASSWORD=eventhub \
 ./mvnw test
 ```
+
+O `SchemaIT` roda só quando `IT_POSTGRES=true`; sem banco ele é pulado em vez de falhar. O CI
+executa esse caminho com um serviço `postgres` — é lá que as migrações `V1..V6` são provadas.
 
 ## 4. Frontend
 

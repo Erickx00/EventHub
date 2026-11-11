@@ -27,6 +27,11 @@ Base: `/api`. JSON em tudo. Datas em ISO-8601 UTC (`2027-03-20T12:00:00Z`).
   sem token, `403` sem permissão, `404` inexistente, `409` conflito de regra de negócio,
   `422` regra semântica (ex.: pedido expirado).
 
+`@PreAuthorize` lança a exceção **dentro** do controller, depois da cadeia de filtros. O
+`GlobalExceptionHandler` traduz `AccessDeniedException` em `403` e `AuthenticationException` em
+`401`; sem isso o catch-all de `Exception` responderia `500` para um participante tentando criar
+evento. Rota inexistente também é traduzida em `404 NOT_FOUND` pelo mesmo motivo.
+
 ## Implementado
 
 | Método | Endpoint | Acesso | Resposta |
