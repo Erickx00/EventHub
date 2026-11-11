@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { EventSummary } from '../lib/api'
 
 const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
@@ -10,11 +11,11 @@ const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
 
 const categoryLabels: Record<string, string> = {
   TECHNOLOGY: 'Tecnologia',
-  MUSIC: 'Música',
-  BUSINESS: 'Negócios',
+  MUSIC: 'Musica',
+  BUSINESS: 'Negocios',
   SPORTS: 'Esportes',
   ARTS: 'Artes',
-  EDUCATION: 'Educação',
+  EDUCATION: 'Educacao',
   FOOD: 'Gastronomia',
   OTHER: 'Outro',
 }
@@ -23,7 +24,10 @@ export function EventCard({ event }: { event: EventSummary }) {
   const category = categoryLabels[event.category] ?? event.category
 
   return (
-    <article className="flex flex-col gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <Link
+      to={`/events/${event.id}`}
+      className="flex flex-col gap-3 rounded-xl border border-slate-800 bg-slate-900/60 p-5 transition hover:border-brand-500/60"
+    >
       <div className="flex items-center justify-between gap-2">
         <span className="rounded-full bg-brand-500/15 px-2.5 py-1 text-xs font-medium text-brand-300">
           {category}
@@ -43,6 +47,6 @@ export function EventCard({ event }: { event: EventSummary }) {
         {event.city}
         {event.venue ? ` · ${event.venue}` : ''}
       </p>
-    </article>
+    </Link>
   )
 }
