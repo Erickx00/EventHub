@@ -5,6 +5,7 @@ import { useAuth } from './contexts/AuthContext'
 import { EventDetailsPage } from './pages/EventDetailsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import { CheckInPage } from './pages/CheckInPage'
 import { MyTicketsPage } from './pages/MyTicketsPage'
 import { OrganizerPage } from './pages/OrganizerPage'
 
@@ -46,6 +47,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <OrganizerPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/checkin"
+            element={
+              <RequireAuth>
+                <CheckInPage />
               </RequireAuth>
             }
           />

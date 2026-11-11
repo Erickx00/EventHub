@@ -11,6 +11,7 @@ React 19 + TypeScript + Vite + Tailwind 4. Roteamento com React Router 7.
 | `/events/:id` | detalhe, tipos de ingresso e compra | compra exige login |
 | `/tickets` | meus ingressos com QR Code | sim |
 | `/organizer` | painel: métricas, novo evento e publicação | sim (organizador/ADMIN) |
+| `/checkin` | portaria: valida o código do ingresso | sim (organizador/ADMIN) |
 
 ## Sessão
 
@@ -50,9 +51,24 @@ o PNG como `Blob` com o header e exibe via `URL.createObjectURL`. As URLs são r
 
 O evento nasce `DRAFT` e só aparece na busca depois de publicado.
 
+## Portaria
+
+`/checkin` valida o código do ingresso em `POST /api/checkins/validate` e traduz os códigos de erro
+para linguagem de operação:
+
+| `code` | Mensagem na tela |
+| --- | --- |
+| `INVALID_QR_TOKEN` | ingresso não encontrado |
+| `TICKET_ALREADY_USED` | ingresso já utilizado |
+| `FORBIDDEN` | você não gerencia este evento |
+
+A entrada é digitada/colada. Leitor de câmera exigiria biblioteca de scan e permissão de mídia —
+fica como evolução; o QR exibido em `/tickets` pode ser lido por qualquer app de leitura e o
+código colado aqui.
+
 ## O que não existe
 
 - testes de frontend (Vitest + Testing Library) — a suíte cobre backend;
 - edição de evento e gestão de múltiplos tipos de ingresso pela UI (existem na API);
-- check-in pela UI (o endpoint `/api/checkins/validate` existe, sem tela de portaria);
+- leitura de QR pela câmera na portaria;
 - refresh automático de token: expirou, o `401` derruba a sessão e o usuário reloga.

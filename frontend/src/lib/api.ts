@@ -152,6 +152,13 @@ export interface TicketSummary {
   readonly issuedAt: string
 }
 
+export interface CheckInResult {
+  readonly ticketId: string
+  readonly eventId: string
+  readonly checkedAt: string
+  readonly validatedBy: string
+}
+
 export interface DashboardSummary {
   readonly totalEvents: number
   readonly publishedEvents: number
@@ -255,5 +262,13 @@ export const api = {
   tickets: {
     mine: () => request<TicketSummary[]>('/api/tickets/me'),
     qrCode: (id: string) => requestBlob(`/api/tickets/${id}/qr`),
+  },
+
+  checkins: {
+    validate: (qrToken: string) =>
+      request<CheckInResult>('/api/checkins/validate', {
+        method: 'POST',
+        body: JSON.stringify({ qrToken }),
+      }),
   },
 }
