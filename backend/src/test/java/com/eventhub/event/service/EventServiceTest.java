@@ -206,6 +206,26 @@ class EventServiceTest {
     }
 
     @Test
+    void finishesEventsWhoseEndDateHasPassed() {
+        Event ended = Event.draft(organizerId, "Evento passado", null, Category.TECHNOLOGY, "Recife", null,
+                Instant.now().minus(3, ChronoUnit.DAYS), Instant.now().minus(2, ChronoUnit.DAYS));
+        ended.publish();
+        when(events.findAllByStatusAndEndDateBefore(any(), any())).thenReturn(List.of(ended));
+
+        int finished = eventService.finishOverdue();
+
+        assertThat(finished).isEqualTo(1);
+        assertThat(ended.getStatus()).isEqualTo(EventStatus.FINISHED);
+    }
+
+    @Test
+    void finishingIsNoOpWhenNothingHasEnded() {
+        when(events.findAllByStatusAndEndDateBefore(any(), any())).thenReturn(List.of());
+
+        assertThat(eventService.finishOverdue()).isZero();
+    }
+
+    @Test
     void searchMapsPageAndKeepsPaginationMetadata() {
         Event event = draftOwnedByOrganizer();
         event.publish();

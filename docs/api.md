@@ -203,6 +203,10 @@ Content-Type: application/json
 
 Listagem publica só devolve `PUBLISHED`. Filtros combináveis, todos opcionais:
 
+> **Eventos passados saem da busca.** Um job fecha (`FINISHED`) todo evento `PUBLISHED` cuja
+> `endDate` já passou, a cada `EVENT_FINISH_SCAN_MS` (5 min). O organizador continua vendo o
+> histórico em `/api/events/mine`, e o dashboard conta normalmente.
+
 ```http
 GET /api/events?category=TECHNOLOGY&city=Campina%20Grande&q=java&from=2027-01-01T00:00:00Z&page=0&size=9
 ```

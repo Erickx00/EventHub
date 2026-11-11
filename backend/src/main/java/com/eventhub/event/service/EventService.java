@@ -183,6 +183,24 @@ public class EventService {
         publisher.publishEvent(EventCancelled.now(event.getId()));
     }
 
+    /**
+     * Fecha eventos cujo fim ja passou. Chamado pelo job: sem isso um evento
+     * antigo continuaria PUBLISHED e aparecendo na busca como se fosse futuro.
+     *
+     * @return quantidade de eventos finalizados nesta passagem
+     */
+    @Transactional
+    public int finishOverdue() {
+        Instant now = Instant.now();
+        List<Event> ended = events.findAllByStatusAndEndDateBefore(EventStatus.PUBLISHED, now);
+
+        for (Event event : ended) {
+            event.finish(now);
+        }
+
+        return ended.size();
+    }
+
     private Event requireEvent(UUID id) {
         return events.findById(id).orElseThrow(EventService::notFound);
     }

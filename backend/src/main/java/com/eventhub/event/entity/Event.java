@@ -140,6 +140,22 @@ public class Event {
         this.status = EventStatus.CANCELLED;
     }
 
+    /**
+     * Encerra um evento publicado cujo fim ja passou. Chamado pelo job; a
+     * checagem de data existe para o metodo nao virar um "force finish".
+     */
+    public void finish(Instant now) {
+        if (status != EventStatus.PUBLISHED) {
+            throw BusinessException.conflict(ErrorCode.EVENT_NOT_EDITABLE,
+                    "Somente eventos publicados podem ser finalizados.");
+        }
+        if (endDate.isAfter(now)) {
+            throw BusinessException.conflict(ErrorCode.INVALID_PERIOD,
+                    "Evento ainda nao terminou.");
+        }
+        this.status = EventStatus.FINISHED;
+    }
+
     private static void requireValidPeriod(Instant startDate, Instant endDate) {
         if (startDate == null || endDate == null || !endDate.isAfter(startDate)) {
             throw BusinessException.badRequest(ErrorCode.INVALID_PERIOD,

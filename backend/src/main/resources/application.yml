@@ -41,6 +41,9 @@ eventhub:
     # Janela para pagar um pedido PENDING antes de expirar e devolver o estoque.
     payment-ttl: ${ORDER_PAYMENT_TTL:PT15M}
     expiry-scan-ms: ${ORDER_EXPIRY_SCAN_MS:60000}
+  events:
+    # Fecha eventos cujo fim ja passou (saem da busca publica).
+    finish-scan-ms: ${EVENT_FINISH_SCAN_MS:300000}
 
 logging:
   level:

@@ -158,7 +158,7 @@ Dívidas conhecidas, nomeadas de propósito — nenhuma delas é surpresa descob
 | Lacuna | Consequência hoje | Caminho |
 | --- | --- | --- |
 | Cancelamento de evento | ✅ pedidos pendentes, pagos (com estorno) e ingressos são tratados | feito |
-| Transição `FINISHED` | evento passado segue `PUBLISHED` e aparece na busca | job que fecha eventos após `end_date` |
+| Transição `FINISHED` | ✅ job fecha eventos após `end_date` | feito |
 | Pagamento simulado | o cliente escolhe `outcome` | gateway real atrás de `PaymentGateway` |
 | Frontend | só a descoberta pública; sem login, compra, ingressos ou painel | etapa de UI |
 | OpenAPI | contrato em `docs/api.md`, sem `/swagger-ui` | springdoc quando houver versão estável para Boot 4 |
