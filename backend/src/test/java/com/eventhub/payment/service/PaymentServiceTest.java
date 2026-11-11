@@ -34,6 +34,8 @@ import com.eventhub.payment.repository.PaymentRepository;
 import com.eventhub.security.AuthPrincipal;
 import com.eventhub.shared.exception.BusinessException;
 import com.eventhub.shared.exception.ErrorCode;
+import com.eventhub.ticket.dto.TicketIssuance;
+import com.eventhub.ticket.service.TicketService;
 import com.eventhub.user.entity.Role;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +47,9 @@ class PaymentServiceTest {
     @Mock
     private PaymentRepository payments;
 
+    @Mock
+    private TicketService ticketService;
+
     private PaymentService paymentService;
 
     private final UUID userId = UUID.randomUUID();
@@ -53,7 +58,7 @@ class PaymentServiceTest {
 
     @BeforeEach
     void setUp() {
-        paymentService = new PaymentService(orders, payments, new SimulatedPaymentGateway());
+        paymentService = new PaymentService(orders, payments, new SimulatedPaymentGateway(), ticketService);
     }
 
     private Order pendingOrder() {
@@ -73,7 +78,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    void approvedPaymentMarksOrderAsPaid() {
+    void approvedPaymentMarksOrderAsPaidAndIssuesTickets() {
         Order order = pendingOrder();
         when(orders.findByIdForUpdate(orderId)).thenReturn(Optional.of(order));
 
@@ -84,6 +89,12 @@ class PaymentServiceTest {
         assertThat(response.orderStatus()).isEqualTo(OrderStatus.PAID);
         assertThat(response.amount()).isEqualByComparingTo("100.00");
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PAID);
+
+        ArgumentCaptor<TicketIssuance> issuance = ArgumentCaptor.forClass(TicketIssuance.class);
+        verify(ticketService).issueFor(issuance.capture());
+        assertThat(issuance.getValue().userId()).isEqualTo(userId);
+        assertThat(issuance.getValue().items()).hasSize(1);
+        assertThat(issuance.getValue().items().get(0).quantity()).isEqualTo(2);
     }
 
     @Test
@@ -101,6 +112,7 @@ class PaymentServiceTest {
         ArgumentCaptor<Payment> saved = ArgumentCaptor.forClass(Payment.class);
         verify(payments).save(saved.capture());
         assertThat(saved.getValue().isApproved()).isFalse();
+        verify(ticketService, never()).issueFor(any());
     }
 
     @Test
