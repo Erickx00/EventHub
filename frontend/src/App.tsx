@@ -6,6 +6,7 @@ import { EventDetailsPage } from './pages/EventDetailsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyTicketsPage } from './pages/MyTicketsPage'
+import { OrganizerPage } from './pages/OrganizerPage'
 
 /**
  * Rota protegida no cliente e apenas conveniencia de UX. A autorizacao real e
@@ -37,6 +38,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <MyTicketsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/organizer"
+            element={
+              <RequireAuth>
+                <OrganizerPage />
               </RequireAuth>
             }
           />

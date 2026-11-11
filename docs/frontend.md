@@ -10,6 +10,7 @@ React 19 + TypeScript + Vite + Tailwind 4. Roteamento com React Router 7.
 | `/login` | entrar ou criar conta (participante ou organizador) | não |
 | `/events/:id` | detalhe, tipos de ingresso e compra | compra exige login |
 | `/tickets` | meus ingressos com QR Code | sim |
+| `/organizer` | painel: métricas, novo evento e publicação | sim (organizador/ADMIN) |
 
 ## Sessão
 
@@ -38,9 +39,20 @@ navegador seria redirecionado; o frontend nunca escolheria o resultado do pagame
 o PNG como `Blob` com o header e exibe via `URL.createObjectURL`. As URLs são revogadas no
 `cleanup` do efeito para não vazar memória.
 
+## Painel do organizador
+
+`/organizer` mostra as métricas de `GET /api/organizer/dashboard`, lista os eventos de
+`GET /api/events/mine` e permite:
+
+- criar evento **junto com o primeiro tipo de ingresso** — um evento sem ingresso não vende, então
+  o formulário cria os dois em sequência;
+- publicar um rascunho (`PATCH /api/events/{id}/publish`).
+
+O evento nasce `DRAFT` e só aparece na busca depois de publicado.
+
 ## O que não existe
 
 - testes de frontend (Vitest + Testing Library) — a suíte cobre backend;
-- painel do organizador na UI (o endpoint existe, a tela não);
-- formulário de criação de evento;
+- edição de evento e gestão de múltiplos tipos de ingresso pela UI (existem na API);
+- check-in pela UI (o endpoint `/api/checkins/validate` existe, sem tela de portaria);
 - refresh automático de token: expirou, o `401` derruba a sessão e o usuário reloga.

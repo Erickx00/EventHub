@@ -23,6 +23,11 @@ export function NavBar() {
               <NavLink to="/tickets" className={linkClass}>
                 Meus ingressos
               </NavLink>
+              {user.role === 'ORGANIZER' || user.role === 'ADMIN' ? (
+                <NavLink to="/organizer" className={linkClass}>
+                  Painel
+                </NavLink>
+              ) : null}
               <span className="hidden text-slate-500 sm:inline">{user.name}</span>
               <button
                 type="button"

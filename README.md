@@ -72,6 +72,7 @@ Detalhes, portas e variáveis: [docs/setup.md](docs/setup.md).
 | 5 | Pedidos e pagamentos (reserva temporária, expiração) | ✅ |
 | 6 | QR Code e check-in (ingresso único, validação atômica) | ✅ |
 | 6b | UI de compra: login, checkout e meus ingressos | ✅ |
+| 6c | Painel do organizador: métricas, criação e publicação | ✅ |
 | 7 | Dashboard do organizador | ✅ |
 | 7b | Testes de integração (Testcontainers) | ⬜ |
 | 8 | OpenAPI, CI com Postgres e deploy | 🟡 OpenAPI e CI prontos; deploy pendente |

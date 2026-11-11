@@ -152,6 +152,36 @@ export interface TicketSummary {
   readonly issuedAt: string
 }
 
+export interface DashboardSummary {
+  readonly totalEvents: number
+  readonly publishedEvents: number
+  readonly ticketsSold: number
+  readonly ticketsAvailable: number
+  readonly revenue: number
+  readonly checkIns: number
+  readonly uniqueAttendees: number
+}
+
+export interface CreateEventPayload {
+  readonly name: string
+  readonly description: string | null
+  readonly category: string
+  readonly city: string
+  readonly venue: string | null
+  readonly startDate: string
+  readonly endDate: string
+}
+
+export interface CreateTicketTypePayload {
+  readonly name: string
+  readonly description: string | null
+  readonly price: number
+  readonly totalQuantity: number
+  readonly maxPerOrder: number
+  readonly salesStart: string
+  readonly salesEnd: string
+}
+
 function toQueryString(query: EventQuery): string {
   const params = new URLSearchParams()
 
@@ -187,8 +217,25 @@ export const api = {
 
   events: {
     list: (query: EventQuery = {}) => request<Page<EventSummary>>(`/api/events${toQueryString(query)}`),
+    mine: () => request<Page<EventSummary>>('/api/events/mine?size=50'),
     get: (id: string) => request<EventSummary>(`/api/events/${id}`),
     ticketTypes: (id: string) => request<TicketTypeSummary[]>(`/api/events/${id}/ticket-types`),
+  },
+
+  organizer: {
+    dashboard: () => request<DashboardSummary>('/api/organizer/dashboard'),
+
+    createEvent: (payload: CreateEventPayload) =>
+      request<EventSummary>('/api/events', { method: 'POST', body: JSON.stringify(payload) }),
+
+    publishEvent: (id: string) =>
+      request<EventSummary>(`/api/events/${id}/publish`, { method: 'PATCH' }),
+
+    createTicketType: (eventId: string, payload: CreateTicketTypePayload) =>
+      request<TicketTypeSummary>(`/api/events/${eventId}/ticket-types`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
   },
 
   orders: {
