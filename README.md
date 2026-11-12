@@ -14,7 +14,13 @@ Plataforma de eventos, venda de ingressos e controle de entrada — monólito mo
 ### ▶ [event-hub-front.vercel.app](https://event-hub-front.vercel.app)
 
 Entre com qualquer e-mail: crie uma conta como **organizador** para publicar um evento, ou como
-**participante** para comprar. A documentação interativa da API fica em `/swagger-ui.html`.
+**participante** para comprar.
+
+| Endereço | O que é |
+| --- | --- |
+| [event-hub-front.vercel.app](https://event-hub-front.vercel.app) | aplicação |
+| [eventhub-api-w7nl.onrender.com/swagger-ui.html](https://eventhub-api-w7nl.onrender.com/swagger-ui.html) | Swagger: todos os endpoints, testáveis com o token |
+| [eventhub-api-w7nl.onrender.com/api/health](https://eventhub-api-w7nl.onrender.com/api/health) | health check da API |
 
 > A API está no plano gratuito do Render e dorme após alguns minutos sem tráfego: a primeira
 > requisição pode levar ~30 s. Abra o link antes de mostrar para alguém.
