@@ -6,6 +6,12 @@ import { accessToken, clearSession, type SessionUser } from './session'
  */
 const BASE_URL: string = import.meta.env.VITE_API_URL ?? ''
 
+/**
+ * Exposto para mensagens de erro: em producao, "API indisponivel" sem dizer para
+ * onde o app esta apontando torna o diagnostico impossivel.
+ */
+export const apiBaseUrl = BASE_URL || '(mesma origem)'
+
 export class ApiError extends Error {
   readonly status: number
   readonly code: string

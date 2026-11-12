@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { EventCard } from '../components/EventCard'
 import { useEvents } from '../hooks/useEvents'
-import type { EventQuery } from '../lib/api'
+import { apiBaseUrl, type EventQuery } from '../lib/api'
 
 const CATEGORIES = [
   { value: '', label: 'Todas as categorias' },
@@ -112,6 +112,7 @@ export function EventsPage() {
       {state.kind === 'error' ? (
         <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200" role="alert">
           Não foi possível carregar os eventos. {state.message}
+          <span className="mt-1 block text-xs text-amber-200/70">API: {apiBaseUrl}</span>
         </p>
       ) : null}
 

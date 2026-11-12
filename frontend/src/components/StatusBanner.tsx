@@ -12,7 +12,7 @@ export function StatusBanner() {
   if (health.kind === 'error') {
     return (
       <span className={`${base} bg-amber-500/15 text-amber-300`} role="status">
-        API offline — suba o backend em :8080
+        API indisponível
       </span>
     )
   }
