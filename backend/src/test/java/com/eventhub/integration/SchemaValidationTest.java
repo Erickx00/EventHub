@@ -21,7 +21,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @SpringBootTest
 @Tag("integration")
 @EnabledIfEnvironmentVariable(named = "IT_POSTGRES", matches = "true")
-class SchemaIT {
+class SchemaValidationTest {
 
     private static final List<String> TABLES = List.of(
             "users", "refresh_tokens", "events", "ticket_types",

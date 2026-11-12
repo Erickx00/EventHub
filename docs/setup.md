@@ -64,7 +64,7 @@ SPRING_DATASOURCE_PASSWORD=eventhub \
 ./mvnw test
 ```
 
-O `SchemaIT` roda só quando `IT_POSTGRES=true`; sem banco ele é pulado em vez de falhar. O CI
+O `SchemaValidationTest` roda só quando `IT_POSTGRES=true`; sem banco ele é pulado em vez de falhar. O CI
 executa esse caminho com um serviço `postgres` — é lá que as migrações `V1..V6` são provadas.
 
 ## 4. Frontend
