@@ -48,6 +48,13 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
+        <!-- No Spring Boot 4 a auto-configuracao do Flyway saiu do core: sem este
+             modulo o Flyway nunca roda e o ddl-auto=validate falha no startup. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-flyway</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
