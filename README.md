@@ -9,10 +9,15 @@ Plataforma de eventos, venda de ingressos e controle de entrada — monólito mo
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![License MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Demo:** [event-hub-front.vercel.app](https://event-hub-front.vercel.app) · **API:** documentação interativa em `/swagger-ui.html` da API publicada (URL no painel do Render)
+## Demo
 
-> A API dorme no plano gratuito: a primeira requisição depois de alguns minutos leva ~30 s.
-> Abra o link antes de mostrar para alguém.
+### ▶ [event-hub-front.vercel.app](https://event-hub-front.vercel.app)
+
+Entre com qualquer e-mail: crie uma conta como **organizador** para publicar um evento, ou como
+**participante** para comprar. A documentação interativa da API fica em `/swagger-ui.html`.
+
+> A API está no plano gratuito do Render e dorme após alguns minutos sem tráfego: a primeira
+> requisição pode levar ~30 s. Abra o link antes de mostrar para alguém.
 
 ---
 
