@@ -2,10 +2,10 @@ import type { ReactElement } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { NavBar } from './components/NavBar'
 import { useAuth } from './contexts/AuthContext'
+import { CheckInPage } from './pages/CheckInPage'
 import { EventDetailsPage } from './pages/EventDetailsPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
-import { CheckInPage } from './pages/CheckInPage'
 import { MyTicketsPage } from './pages/MyTicketsPage'
 import { OrganizerPage } from './pages/OrganizerPage'
 
@@ -26,10 +26,10 @@ function RequireAuth({ children }: { children: ReactElement }) {
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <div className="flex min-h-screen flex-col bg-canvas text-ink">
       <NavBar />
 
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -60,10 +60,22 @@ export default function App() {
           />
           <Route
             path="*"
-            element={<p className="text-sm text-slate-400">Pagina nao encontrada.</p>}
+            element={
+              <div className="mx-auto max-w-3xl px-5 py-20 text-center">
+                <p className="text-lg font-bold text-ink">Página não encontrada</p>
+                <p className="mt-1 text-sm text-ink-soft">Volte para a lista de eventos.</p>
+              </div>
+            }
           />
         </Routes>
       </main>
+
+      <footer className="border-t border-brand-700/10 bg-white">
+        <div className="mx-auto flex max-w-6xl flex-col gap-1 px-5 py-6 text-xs text-ink-faint sm:flex-row sm:items-center sm:justify-between">
+          <span>EventHub · projeto de portfólio</span>
+          <span>Java 21 · Spring Boot 4 · React 19</span>
+        </div>
+      </footer>
     </div>
   )
 }

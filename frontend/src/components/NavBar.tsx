@@ -1,19 +1,22 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
-const linkClass = 'text-slate-300 transition hover:text-white'
+const linkClass = 'btn-ghost'
 
 export function NavBar() {
   const { user, logout } = useAuth()
 
   return (
-    <header className="border-b border-slate-800 bg-slate-950/80">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-        <Link to="/" className="text-lg font-semibold tracking-tight text-white">
+    <header className="sticky top-0 z-40 border-b border-brand-700/10 bg-white/85 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
+        <Link to="/" className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-ink">
+          <span className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-black text-white">
+            E
+          </span>
           EventHub
         </Link>
 
-        <nav className="flex items-center gap-4 text-sm">
+        <nav className="flex items-center gap-1 sm:gap-2">
           <NavLink to="/" className={linkClass} end>
             Eventos
           </NavLink>
@@ -33,20 +36,13 @@ export function NavBar() {
                   </NavLink>
                 </>
               ) : null}
-              <span className="hidden text-slate-500 sm:inline">{user.name}</span>
-              <button
-                type="button"
-                onClick={() => void logout()}
-                className="rounded-lg border border-slate-700 px-3 py-1.5 text-slate-200 transition hover:border-slate-500"
-              >
+              <span className="hidden max-w-32 truncate text-sm text-ink-soft md:inline">{user.name}</span>
+              <button type="button" onClick={() => void logout()} className="btn-secondary">
                 Sair
               </button>
             </>
           ) : (
-            <Link
-              to="/login"
-              className="rounded-lg bg-brand-600 px-3 py-1.5 font-medium text-white transition hover:bg-brand-500"
-            >
+            <Link to="/login" className="btn-primary">
               Entrar
             </Link>
           )}

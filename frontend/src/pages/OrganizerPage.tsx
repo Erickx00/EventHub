@@ -103,7 +103,7 @@ export function OrganizerPage() {
       setShowForm(false)
       await refresh()
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Nao foi possivel criar o evento.')
+      setError(caught instanceof Error ? caught.message : 'Não foi possível criar o evento.')
     } finally {
       setBusy(false)
     }
@@ -116,7 +116,7 @@ export function OrganizerPage() {
       await api.organizer.publishEvent(id)
       await refresh()
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Nao foi possivel publicar.')
+      setError(caught instanceof Error ? caught.message : 'Não foi possível publicar.')
     } finally {
       setPublishing(null)
     }
@@ -124,200 +124,262 @@ export function OrganizerPage() {
 
   if (!allowed) {
     return (
-      <p className="rounded-lg border border-slate-800 bg-slate-900/40 p-6 text-sm text-slate-400">
-        Esta area e para organizadores. Crie uma conta como organizador para publicar eventos.
-      </p>
+      <div className="mx-auto max-w-3xl px-5 py-16">
+        <div className="card p-8 text-center">
+          <p className="text-lg font-bold text-ink">Área do organizador</p>
+          <p className="mt-1 text-sm text-ink-soft">
+            Crie uma conta como organizador para publicar eventos.
+          </p>
+        </div>
+      </div>
     )
   }
 
+  const stats = dashboard
+    ? [
+        { label: 'Eventos', value: String(dashboard.totalEvents) },
+        { label: 'Publicados', value: String(dashboard.publishedEvents) },
+        { label: 'Vendidos', value: String(dashboard.ticketsSold) },
+        { label: 'Disponíveis', value: String(dashboard.ticketsAvailable) },
+        { label: 'Receita', value: money.format(dashboard.revenue) },
+        { label: 'Check-ins', value: String(dashboard.checkIns) },
+      ]
+    : []
+
   return (
-    <section className="flex flex-col gap-8">
-      <header className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-white">Painel do organizador</h1>
-        <button
-          type="button"
-          onClick={() => setShowForm((current) => !current)}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-500"
-        >
+    <div className="mx-auto max-w-6xl px-5 py-10">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-extrabold text-ink">Painel do organizador</h1>
+          <p className="mt-1 text-sm text-ink-soft">Acompanhe vendas e publique seus eventos.</p>
+        </div>
+        <button type="button" onClick={() => setShowForm((current) => !current)} className="btn-primary">
           {showForm ? 'Cancelar' : 'Novo evento'}
         </button>
       </header>
 
       {dashboard ? (
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {[
-            { label: 'Eventos', value: String(dashboard.totalEvents) },
-            { label: 'Publicados', value: String(dashboard.publishedEvents) },
-            { label: 'Vendidos', value: String(dashboard.ticketsSold) },
-            { label: 'Disponiveis', value: String(dashboard.ticketsAvailable) },
-            { label: 'Receita', value: money.format(dashboard.revenue) },
-            { label: 'Check-ins', value: String(dashboard.checkIns) },
-          ].map((card) => (
-            <div key={card.label} className="rounded-xl border border-slate-800 bg-slate-900/40 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">{card.label}</p>
-              <p className="mt-1 text-lg font-semibold text-white">{card.value}</p>
+        <div className="mt-6 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {stats.map((card) => (
+            <div key={card.label} className="card p-4">
+              <p className="text-[0.7rem] font-bold uppercase tracking-wide text-ink-faint">{card.label}</p>
+              <p className="mt-1 text-lg font-extrabold text-ink">{card.value}</p>
             </div>
           ))}
         </div>
       ) : null}
 
       {showForm ? (
-        <form
-          onSubmit={(event) => void handleCreate(event)}
-          className="grid gap-3 rounded-xl border border-slate-800 bg-slate-900/40 p-5 sm:grid-cols-2"
-        >
-          <input
-            required
-            placeholder="Nome do evento"
-            value={form.name}
-            onChange={(event) => update('name', event.target.value)}
-            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-          />
-          <input
-            required
-            placeholder="Cidade"
-            value={form.city}
-            onChange={(event) => update('city', event.target.value)}
-            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-          />
-          <select
-            value={form.category}
-            onChange={(event) => update('category', event.target.value)}
-            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-          >
-            {CATEGORIES.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-          <input
-            placeholder="Local (opcional)"
-            value={form.venue}
-            onChange={(event) => update('venue', event.target.value)}
-            className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-          />
-          <label className="flex flex-col gap-1 text-xs text-slate-400">
-            Inicio
+        <form onSubmit={(event) => void handleCreate(event)} className="card mt-6 grid gap-4 p-6 sm:grid-cols-2">
+          <div>
+            <label className="label" htmlFor="event-name">
+              Nome do evento
+            </label>
             <input
+              id="event-name"
+              required
+              value={form.name}
+              onChange={(event) => update('name', event.target.value)}
+              className="field"
+            />
+          </div>
+
+          <div>
+            <label className="label" htmlFor="event-city">
+              Cidade
+            </label>
+            <input
+              id="event-city"
+              required
+              value={form.city}
+              onChange={(event) => update('city', event.target.value)}
+              className="field"
+            />
+          </div>
+
+          <div>
+            <label className="label" htmlFor="event-category">
+              Categoria
+            </label>
+            <select
+              id="event-category"
+              value={form.category}
+              onChange={(event) => update('category', event.target.value)}
+              className="field"
+            >
+              {CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label" htmlFor="event-venue">
+              Local (opcional)
+            </label>
+            <input
+              id="event-venue"
+              value={form.venue}
+              onChange={(event) => update('venue', event.target.value)}
+              className="field"
+            />
+          </div>
+
+          <div>
+            <label className="label" htmlFor="event-start">
+              Início
+            </label>
+            <input
+              id="event-start"
               required
               type="datetime-local"
               value={form.startDate}
               onChange={(event) => update('startDate', event.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+              className="field"
             />
-          </label>
-          <label className="flex flex-col gap-1 text-xs text-slate-400">
-            Fim
+          </div>
+
+          <div>
+            <label className="label" htmlFor="event-end">
+              Fim
+            </label>
             <input
+              id="event-end"
               required
               type="datetime-local"
               value={form.endDate}
               onChange={(event) => update('endDate', event.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
+              className="field"
             />
-          </label>
-          <textarea
-            placeholder="Descricao (opcional)"
-            value={form.description}
-            onChange={(event) => update('description', event.target.value)}
-            rows={2}
-            className="sm:col-span-2 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-          />
+          </div>
 
-          <fieldset className="sm:col-span-2 grid gap-3 rounded-lg border border-slate-800 p-3 sm:grid-cols-4">
-            <legend className="px-1 text-xs uppercase tracking-wide text-slate-500">
+          <div className="sm:col-span-2">
+            <label className="label" htmlFor="event-description">
+              Descrição (opcional)
+            </label>
+            <textarea
+              id="event-description"
+              rows={2}
+              value={form.description}
+              onChange={(event) => update('description', event.target.value)}
+              className="field"
+            />
+          </div>
+
+          <fieldset className="sm:col-span-2 grid gap-4 rounded-2xl border border-brand-700/10 bg-brand-50/40 p-4 sm:grid-cols-4">
+            <legend className="px-1 text-[0.7rem] font-bold uppercase tracking-wide text-ink-faint">
               Primeiro tipo de ingresso
             </legend>
-            <input
-              required
-              placeholder="Nome"
-              value={form.ticketName}
-              onChange={(event) => update('ticketName', event.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-            />
-            <input
-              required
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="Preco"
-              value={form.price}
-              onChange={(event) => update('price', event.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-            />
-            <input
-              required
-              type="number"
-              min="1"
-              placeholder="Quantidade"
-              value={form.totalQuantity}
-              onChange={(event) => update('totalQuantity', event.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-            />
-            <input
-              required
-              type="number"
-              min="1"
-              placeholder="Max. por pedido"
-              value={form.maxPerOrder}
-              onChange={(event) => update('maxPerOrder', event.target.value)}
-              className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100"
-            />
+
+            <div>
+              <label className="label" htmlFor="ticket-name">
+                Nome
+              </label>
+              <input
+                id="ticket-name"
+                required
+                value={form.ticketName}
+                onChange={(event) => update('ticketName', event.target.value)}
+                className="field"
+              />
+            </div>
+
+            <div>
+              <label className="label" htmlFor="ticket-price">
+                Preço
+              </label>
+              <input
+                id="ticket-price"
+                required
+                type="number"
+                step="0.01"
+                min="0"
+                value={form.price}
+                onChange={(event) => update('price', event.target.value)}
+                className="field"
+              />
+            </div>
+
+            <div>
+              <label className="label" htmlFor="ticket-total">
+                Quantidade
+              </label>
+              <input
+                id="ticket-total"
+                required
+                type="number"
+                min="1"
+                value={form.totalQuantity}
+                onChange={(event) => update('totalQuantity', event.target.value)}
+                className="field"
+              />
+            </div>
+
+            <div>
+              <label className="label" htmlFor="ticket-max">
+                Máx. por pedido
+              </label>
+              <input
+                id="ticket-max"
+                required
+                type="number"
+                min="1"
+                value={form.maxPerOrder}
+                onChange={(event) => update('maxPerOrder', event.target.value)}
+                className="field"
+              />
+            </div>
           </fieldset>
 
-          <button
-            type="submit"
-            disabled={busy}
-            className="sm:col-span-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-500 disabled:opacity-50"
-          >
+          <button type="submit" disabled={busy} className="btn-primary sm:col-span-2">
             {busy ? 'Criando…' : 'Criar evento como rascunho'}
           </button>
         </form>
       ) : null}
 
       {error ? (
-        <p role="alert" className="rounded-lg bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+        <p role="alert" className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           {error}
         </p>
       ) : null}
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-white">Meus eventos</h2>
+      <section className="mt-8">
+        <h2 className="text-lg font-bold text-ink">Meus eventos</h2>
 
         {events.length === 0 ? (
-          <p className="rounded-lg border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-400">
-            Nenhum evento ainda. Use "Novo evento" para criar o primeiro.
-          </p>
+          <div className="card mt-3 p-8 text-center text-sm text-ink-soft">
+            Nenhum evento ainda. Use “Novo evento” para criar o primeiro.
+          </div>
         ) : null}
 
-        {events.map((event) => (
-          <div
-            key={event.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/40 p-4"
-          >
-            <div>
-              <p className="font-medium text-white">{event.name}</p>
-              <p className="text-xs text-slate-400">
-                {event.city} · {event.status}
-              </p>
-            </div>
+        <div className="mt-3 flex flex-col gap-3">
+          {events.map((event) => (
+            <div key={event.id} className="card flex flex-wrap items-center justify-between gap-3 p-4">
+              <div className="min-w-0">
+                <p className="font-bold text-ink">{event.name}</p>
+                <p className="text-xs text-ink-soft">
+                  {event.city} · {event.status}
+                </p>
+              </div>
 
-            {event.status === 'DRAFT' ? (
-              <button
-                type="button"
-                onClick={() => void handlePublish(event.id)}
-                disabled={publishing === event.id}
-                className="rounded-lg border border-brand-500/60 px-3 py-1.5 text-sm text-brand-300 transition hover:bg-brand-500/10 disabled:opacity-50"
-              >
-                {publishing === event.id ? 'Publicando…' : 'Publicar'}
-              </button>
-            ) : (
-              <span className="text-xs text-slate-500">Publicado</span>
-            )}
-          </div>
-        ))}
+              {event.status === 'DRAFT' ? (
+                <button
+                  type="button"
+                  onClick={() => void handlePublish(event.id)}
+                  disabled={publishing === event.id}
+                  className="btn-secondary"
+                >
+                  {publishing === event.id ? 'Publicando…' : 'Publicar'}
+                </button>
+              ) : (
+                <span className="chip chip-neutral">Publicado</span>
+              )}
+            </div>
+          ))}
+        </div>
       </section>
-    </section>
+    </div>
   )
 }

@@ -9,10 +9,18 @@ type PageState =
   | { kind: 'error'; message: string }
 
 const priceFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
-const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
-  dateStyle: 'full',
-  timeStyle: 'short',
-})
+const dateFormatter = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full', timeStyle: 'short' })
+
+const categoryLabels: Record<string, string> = {
+  TECHNOLOGY: 'Tecnologia',
+  MUSIC: 'Música',
+  BUSINESS: 'Negócios',
+  SPORTS: 'Esportes',
+  ARTS: 'Artes',
+  EDUCATION: 'Educação',
+  FOOD: 'Gastronomia',
+  OTHER: 'Outro',
+}
 
 export function EventDetailsPage() {
   const { id = '' } = useParams<{ id: string }>()
@@ -69,25 +77,31 @@ export function EventDetailsPage() {
       // Simulador: aqui o fluxo real redirecionaria para o gateway.
       const payment = await api.orders.pay(order.id, 'APPROVED')
       if (payment.orderStatus !== 'PAID') {
-        throw new Error('Pagamento nao aprovado.')
+        throw new Error('Pagamento não aprovado.')
       }
       navigate('/tickets')
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Nao foi possivel concluir a compra.')
+      setError(caught instanceof Error ? caught.message : 'Não foi possível concluir a compra.')
     } finally {
       setBusy(false)
     }
   }
 
   if (state.kind === 'loading') {
-    return <p className="text-sm text-slate-400">Carregando evento…</p>
+    return (
+      <div className="mx-auto max-w-4xl px-5 py-16">
+        <p className="text-sm text-ink-soft">Carregando evento…</p>
+      </div>
+    )
   }
 
   if (state.kind === 'error') {
     return (
-      <p role="alert" className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">
-        {state.message}
-      </p>
+      <div className="mx-auto max-w-4xl px-5 py-16">
+        <p role="alert" className="card border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+          {state.message}
+        </p>
+      </div>
     )
   }
 
@@ -96,91 +110,114 @@ export function EventDetailsPage() {
     (sum, ticketType) => sum + (quantities[ticketType.id] ?? 0) * ticketType.price,
     0,
   )
+  const hasSelection = total > 0
 
   return (
-    <article className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <span className="w-fit rounded-full bg-brand-500/15 px-2.5 py-1 text-xs font-medium text-brand-300">
-          {event.category}
-        </span>
-        <h1 className="text-3xl font-semibold text-white">{event.name}</h1>
-        <p className="text-sm text-slate-400">
-          {dateFormatter.format(new Date(event.startDate))} · {event.city}
-          {event.venue ? ` · ${event.venue}` : ''}
-        </p>
-        {event.description ? <p className="max-w-prose text-slate-300">{event.description}</p> : null}
-      </header>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold text-white">Ingressos</h2>
-
-        {ticketTypes.length === 0 ? (
-          <p className="rounded-lg border border-slate-800 bg-slate-900/40 p-4 text-sm text-slate-400">
-            Este evento ainda nao tem ingressos a venda.
-          </p>
-        ) : null}
-
-        {ticketTypes.map((ticketType) => {
-          const quantity = quantities[ticketType.id] ?? 0
-          const disabled = ticketType.soldOut || ticketType.availableQuantity === 0
-
-          return (
-            <div
-              key={ticketType.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-900/40 p-4"
-            >
-              <div>
-                <p className="font-medium text-white">{ticketType.name}</p>
-                <p className="text-sm text-slate-400">
-                  {priceFormatter.format(ticketType.price)} · {ticketType.availableQuantity} disponiveis · max{' '}
-                  {ticketType.maxPerOrder} por pedido
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setQuantity(ticketType.id, quantity - 1, ticketType.maxPerOrder)}
-                  disabled={disabled || quantity === 0}
-                  className="h-9 w-9 rounded-lg border border-slate-700 text-slate-200 disabled:opacity-40"
-                >
-                  −
-                </button>
-                <span className="w-8 text-center text-sm text-slate-100">{quantity}</span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity(ticketType.id, quantity + 1, ticketType.maxPerOrder)}
-                  disabled={disabled || quantity >= ticketType.maxPerOrder}
-                  className="h-9 w-9 rounded-lg border border-slate-700 text-slate-200 disabled:opacity-40"
-                >
-                  +
-                </button>
-              </div>
+    <div className="mx-auto max-w-5xl px-5 py-10">
+      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+        <div className="flex flex-col gap-5">
+          <header className="hero-gradient card border-0 p-6 sm:p-8">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="chip">{categoryLabels[event.category] ?? event.category}</span>
+              <span className="chip chip-neutral">{event.status === 'PUBLISHED' ? 'À venda' : event.status}</span>
             </div>
-          )
-        })}
-      </section>
 
-      <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-4">
-        <p className="text-slate-300">
-          Total: <span className="font-semibold text-white">{priceFormatter.format(total)}</span>
-        </p>
+            <h1 className="mt-4 text-3xl font-extrabold text-ink sm:text-4xl">{event.name}</h1>
 
-        <button
-          type="button"
-          onClick={() => void handleBuy()}
-          disabled={busy || total === 0}
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-500 disabled:opacity-50"
-        >
-          {busy ? 'Processando…' : user ? 'Comprar' : 'Entrar para comprar'}
-        </button>
-      </footer>
+            <p className="mt-3 text-sm text-ink-soft">
+              {dateFormatter.format(new Date(event.startDate))} · {event.city}
+              {event.venue ? ` · ${event.venue}` : ''}
+            </p>
 
-      {error ? (
-        <p role="alert" className="rounded-lg bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
-          {error}
-        </p>
-      ) : null}
-    </article>
+            {event.description ? (
+              <p className="mt-4 max-w-prose text-ink-soft">{event.description}</p>
+            ) : null}
+          </header>
+
+          <section className="card p-6">
+            <h2 className="text-lg font-bold text-ink">Ingressos</h2>
+
+            {ticketTypes.length === 0 ? (
+              <p className="mt-3 text-sm text-ink-soft">Este evento ainda não tem ingressos à venda.</p>
+            ) : null}
+
+            <div className="mt-4 flex flex-col gap-3">
+              {ticketTypes.map((ticketType) => {
+                const quantity = quantities[ticketType.id] ?? 0
+                const disabled = ticketType.soldOut || ticketType.availableQuantity === 0
+
+                return (
+                  <div
+                    key={ticketType.id}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-700/10 bg-brand-50/40 p-4"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-bold text-ink">{ticketType.name}</p>
+                      <p className="text-sm text-ink-soft">
+                        {priceFormatter.format(ticketType.price)} · {ticketType.availableQuantity} disponíveis ·
+                        máx. {ticketType.maxPerOrder} por pedido
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(ticketType.id, quantity - 1, ticketType.maxPerOrder)}
+                        disabled={disabled || quantity === 0}
+                        aria-label={`Remover um ingresso ${ticketType.name}`}
+                        className="btn-secondary h-11 w-11 !px-0 text-lg"
+                      >
+                        −
+                      </button>
+                      <span className="w-8 text-center font-bold text-ink" aria-live="polite">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(ticketType.id, quantity + 1, ticketType.maxPerOrder)}
+                        disabled={disabled || quantity >= ticketType.maxPerOrder}
+                        aria-label={`Adicionar um ingresso ${ticketType.name}`}
+                        className="btn-secondary h-11 w-11 !px-0 text-lg"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        </div>
+
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <div className="card p-6">
+            <p className="text-xs font-bold uppercase tracking-wide text-ink-faint">Resumo</p>
+            <p className="mt-2 text-3xl font-extrabold text-ink">{priceFormatter.format(total)}</p>
+            <p className="mt-1 text-xs text-ink-soft">
+              {hasSelection ? 'Reserva válida por 15 minutos após confirmar.' : 'Selecione ao menos um ingresso.'}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => void handleBuy()}
+              disabled={busy || !hasSelection}
+              className="btn-primary mt-5 w-full"
+            >
+              {busy ? 'Processando…' : user ? 'Comprar' : 'Entrar para comprar'}
+            </button>
+
+            {error ? (
+              <p role="alert" className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                {error}
+              </p>
+            ) : null}
+
+            <p className="mt-4 text-xs text-ink-faint">
+              Pagamento simulado: nenhuma cobrança real é feita neste projeto.
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
   )
 }

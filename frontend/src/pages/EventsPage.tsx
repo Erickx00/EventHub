@@ -53,105 +53,110 @@ export function EventsPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <form
-        onSubmit={handleSubmit}
-        className="grid gap-3 rounded-xl border border-slate-800 bg-slate-900/40 p-4 sm:grid-cols-[1fr_auto_auto_auto]"
-      >
-        <label className="sr-only" htmlFor="event-search">
-          Buscar por nome
-        </label>
-        <input
-          id="event-search"
-          value={term}
-          onChange={(event) => setTerm(event.target.value)}
-          placeholder="Buscar evento pelo nome"
-          className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-brand-500"
-        />
+      <form onSubmit={handleSubmit} className="card grid gap-3 p-4 sm:grid-cols-[1.4fr_1fr_auto_auto]">
+        <div>
+          <label className="label" htmlFor="event-search">
+            Buscar
+          </label>
+          <input
+            id="event-search"
+            value={term}
+            onChange={(event) => setTerm(event.target.value)}
+            placeholder="Nome do evento"
+            className="field"
+          />
+        </div>
 
-        <label className="sr-only" htmlFor="event-city">
-          Cidade
-        </label>
-        <input
-          id="event-city"
-          value={city}
-          onChange={(event) => setCity(event.target.value)}
-          placeholder="Cidade"
-          className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-brand-500"
-        />
+        <div>
+          <label className="label" htmlFor="event-city">
+            Cidade
+          </label>
+          <input
+            id="event-city"
+            value={city}
+            onChange={(event) => setCity(event.target.value)}
+            placeholder="Campina Grande"
+            className="field"
+          />
+        </div>
 
-        <label className="sr-only" htmlFor="event-category">
-          Categoria
-        </label>
-        <select
-          id="event-category"
-          value={category}
-          onChange={(event) => setCategory(event.target.value)}
-          className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 outline-none focus:border-brand-500"
-        >
-          {CATEGORIES.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <div>
+          <label className="label" htmlFor="event-category">
+            Categoria
+          </label>
+          <select
+            id="event-category"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            className="field"
+          >
+            {CATEGORIES.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <button
-          type="submit"
-          className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-500"
-        >
-          Buscar
-        </button>
+        <div className="flex items-end">
+          <button type="submit" className="btn-primary w-full sm:w-auto">
+            Buscar
+          </button>
+        </div>
       </form>
 
       {state.kind === 'loading' ? (
-        <p className="text-sm text-slate-400" role="status">
+        <p className="text-sm text-ink-soft" role="status">
           Carregando eventos…
         </p>
       ) : null}
 
       {state.kind === 'error' ? (
-        <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200" role="alert">
+        <p role="alert" className="card border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           Não foi possível carregar os eventos. {state.message}
-          <span className="mt-1 block text-xs text-amber-200/70">API: {apiBaseUrl}</span>
+          <span className="mt-1 block text-xs text-amber-800/70">API: {apiBaseUrl}</span>
         </p>
       ) : null}
 
       {state.kind === 'ok' && state.data.content.length === 0 ? (
-        <p className="rounded-lg border border-slate-800 bg-slate-900/40 p-6 text-center text-sm text-slate-400">
-          Nenhum evento encontrado com esses filtros.
-        </p>
+        <div className="card p-10 text-center">
+          <p className="text-lg font-bold text-ink">Nenhum evento por aqui ainda</p>
+          <p className="mt-1 text-sm text-ink-soft">
+            Ajuste os filtros ou volte mais tarde — novos eventos aparecem aqui.
+          </p>
+        </div>
       ) : null}
 
       {state.kind === 'ok' && state.data.content.length > 0 ? (
         <>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-ink-soft">
             {totalElements} {totalElements === 1 ? 'evento encontrado' : 'eventos encontrados'}
           </p>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {state.data.content.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
           </div>
 
           {totalPages > 1 ? (
-            <nav className="flex items-center justify-between" aria-label="Paginação">
+            <nav className="flex items-center justify-between gap-3" aria-label="Paginação">
               <button
                 type="button"
                 onClick={() => setPage((current) => Math.max(0, current - 1))}
                 disabled={page === 0}
-                className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 disabled:opacity-40"
+                className="btn-secondary"
               >
                 Anterior
               </button>
-              <span className="text-sm text-slate-400">
+              <span className="text-sm text-ink-soft">
                 Página {page + 1} de {totalPages}
               </span>
               <button
                 type="button"
                 onClick={() => setPage((current) => Math.min(totalPages - 1, current + 1))}
                 disabled={page >= totalPages - 1}
-                className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 disabled:opacity-40"
+                className="btn-secondary"
               >
                 Próxima
               </button>

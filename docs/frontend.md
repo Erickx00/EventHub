@@ -2,6 +2,25 @@
 
 React 19 + TypeScript + Vite + Tailwind 4. Roteamento com React Router 7.
 
+## Direção visual
+
+Tema claro e arejado, inspirado em landing de conferência:
+
+| Token | Valor | Uso |
+| --- | --- | --- |
+| `--color-canvas` | `#f8f6ff` | fundo da página |
+| `--color-surface` | `#ffffff` | cards |
+| `--color-ink` / `--color-ink-soft` | `#17103a` / `#5b5576` | texto principal e secundário |
+| `--color-brand-600/700` | `#7c3aed` / `#6d28d9` | CTA e links |
+| `--color-pastel-*` | lilás, rosa, azul | gradiente do hero |
+
+Componentes base ficam em `src/index.css` (`.card`, `.btn-primary`, `.btn-secondary`, `.field`,
+`.chip`, `.hero-gradient`), então as telas não repetem classes utilitárias longas.
+
+Regras de acessibilidade aplicadas: texto principal com contraste ≥ 7:1, foco sempre visível
+(`:focus-visible` com anel lilás), alvos de toque com `min-height: 44px`, `prefers-reduced-motion`
+desligando transições e `aria-label` nos botões de quantidade.
+
 ## Rotas
 
 | Rota | Tela | Protegida |
