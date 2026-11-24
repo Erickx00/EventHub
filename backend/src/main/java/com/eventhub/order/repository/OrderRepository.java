@@ -28,11 +28,17 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @Query("select o from Order o where o.id = :id")
     Optional<Order> findByIdForUpdate(@Param("id") UUID id);
 
+    /** Candidate identifiers are read without holding a large result set locked.
+     * Each candidate is then reloaded with findByIdForUpdate before transition. */
+    @Query("select o.id from Order o where o.status = :status and o.expiresAt < :now order by o.id")
+    List<UUID> findIdsByStatusAndExpiresAtBefore(@Param("status") OrderStatus status, @Param("now") Instant now);
+
     Page<Order> findAllByUserIdOrderByCreatedAtDesc(UUID userId, Pageable pageable);
 
-    List<Order> findAllByStatusAndExpiresAtBefore(OrderStatus status, Instant now);
-
-    List<Order> findAllByEventIdAndStatus(UUID eventId, OrderStatus status);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select o from Order o where o.eventId = :eventId and o.status = :status order by o.id")
+    List<Order> findAllByEventIdAndStatusForUpdate(@Param("eventId") UUID eventId,
+            @Param("status") OrderStatus status);
 
     /**
      * Receita = soma do total de pedidos PAID dos eventos do organizador. O

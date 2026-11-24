@@ -49,7 +49,7 @@ public class EventCancelledListener {
         int refundedOrders = 0;
 
         // Pending: devolve o estoque reservado.
-        for (Order order : orders.findAllByEventIdAndStatus(event.eventId(), OrderStatus.PENDING)) {
+        for (Order order : orders.findAllByEventIdAndStatusForUpdate(event.eventId(), OrderStatus.PENDING)) {
             order.cancel();
             for (OrderItem item : order.getItems()) {
                 ticketTypeService.release(item.getTicketTypeId(), item.getQuantity());
@@ -58,7 +58,7 @@ public class EventCancelledListener {
         }
 
         // Paid: cancela e estorna. O ingresso e invalidado no lote abaixo.
-        for (Order order : orders.findAllByEventIdAndStatus(event.eventId(), OrderStatus.PAID)) {
+        for (Order order : orders.findAllByEventIdAndStatusForUpdate(event.eventId(), OrderStatus.PAID)) {
             order.cancelAfterPayment();
             paymentService.refund(order);
             refundedOrders++;
