@@ -195,11 +195,12 @@ class OrderServiceTest {
     void cancellingReleasesReservedStock() {
         UUID ticketTypeId = UUID.randomUUID();
         UUID orderId = UUID.randomUUID();
-        when(orders.findById(orderId)).thenReturn(Optional.of(pendingOrderWithItem(ticketTypeId, 2)));
+        when(orders.findByIdForUpdate(orderId)).thenReturn(Optional.of(pendingOrderWithItem(ticketTypeId, 2)));
 
         var response = orderService.cancel(orderId, attendee);
 
         assertThat(response.status()).isEqualTo(OrderStatus.CANCELLED);
+        verify(orders).findByIdForUpdate(orderId);
         verify(ticketTypeService).release(ticketTypeId, 2);
     }
 
@@ -218,22 +219,42 @@ class OrderServiceTest {
     void expiresOverdueOrdersAndReturnsStock() {
         UUID ticketTypeId = UUID.randomUUID();
         Order overdue = pendingOrderWithItem(ticketTypeId, 2);
+        UUID orderId = UUID.randomUUID();
+        setField(overdue, "id", orderId);
         setExpiresAt(overdue, Instant.now().minus(1, ChronoUnit.MINUTES));
 
-        when(orders.findAllByStatusAndExpiresAtBefore(any(), any())).thenReturn(List.of(overdue));
+        when(orders.findIdsByStatusAndExpiresAtBefore(any(), any())).thenReturn(List.of(orderId));
+        when(orders.findByIdForUpdate(orderId)).thenReturn(Optional.of(overdue));
 
         int expired = orderService.expireOverdue();
 
         assertThat(expired).isEqualTo(1);
         assertThat(overdue.getStatus()).isEqualTo(OrderStatus.EXPIRED);
+        verify(orders).findByIdForUpdate(orderId);
         verify(ticketTypeService).release(ticketTypeId, 2);
     }
 
     @Test
     void expirationIsIdempotentWhenNoOrderIsOverdue() {
-        when(orders.findAllByStatusAndExpiresAtBefore(any(), any())).thenReturn(List.of());
+        when(orders.findIdsByStatusAndExpiresAtBefore(any(), any())).thenReturn(List.of());
 
         assertThat(orderService.expireOverdue()).isZero();
+        verify(ticketTypeService, never()).release(any(), anyInt());
+    }
+
+    @Test
+    void skipsCandidateThatWasPaidBeforeTheLockWasAcquired() {
+        UUID ticketTypeId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        Order paid = pendingOrderWithItem(ticketTypeId, 2);
+        paid.markPaid();
+        setExpiresAt(paid, Instant.now().minus(1, ChronoUnit.MINUTES));
+
+        when(orders.findIdsByStatusAndExpiresAtBefore(any(), any())).thenReturn(List.of(orderId));
+        when(orders.findByIdForUpdate(orderId)).thenReturn(Optional.of(paid));
+
+        assertThat(orderService.expireOverdue()).isZero();
+        assertThat(paid.getStatus()).isEqualTo(OrderStatus.PAID);
         verify(ticketTypeService, never()).release(any(), anyInt());
     }
 }

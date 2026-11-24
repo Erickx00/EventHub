@@ -100,7 +100,7 @@ public class OrderService {
      */
     @Transactional
     public OrderResponse cancel(UUID id, AuthPrincipal principal) {
-        Order order = requireOwnedOrder(id, principal);
+        Order order = requireOwnedOrderForUpdate(id, principal);
         order.cancel();
         releaseStock(order);
         return OrderResponse.from(order);
@@ -113,14 +113,23 @@ public class OrderService {
      */
     @Transactional
     public int expireOverdue() {
-        List<Order> overdue = orders.findAllByStatusAndExpiresAtBefore(OrderStatus.PENDING, Instant.now());
+        Instant now = Instant.now();
+        List<UUID> overdueIds = orders.findIdsByStatusAndExpiresAtBefore(OrderStatus.PENDING, now);
+        int expired = 0;
 
-        for (Order order : overdue) {
+        for (UUID id : overdueIds) {
+            // Re-read after acquiring the same row lock as payment/cancellation.
+            // Another worker may have changed the order since candidate selection.
+            Order order = orders.findByIdForUpdate(id).orElse(null);
+            if (order == null || !order.isOverdueAt(now)) {
+                continue;
+            }
             order.expire();
             releaseStock(order);
+            expired++;
         }
 
-        return overdue.size();
+        return expired;
     }
 
     private void releaseStock(Order order) {
@@ -135,6 +144,17 @@ public class OrderService {
 
         if (!order.getUserId().equals(principal.userId())) {
             // 404 em vez de 403: nao confirma que o pedido existe.
+            throw BusinessException.notFound(ErrorCode.ORDER_NOT_FOUND, "Pedido nao encontrado.");
+        }
+
+        return order;
+    }
+
+    private Order requireOwnedOrderForUpdate(UUID id, AuthPrincipal principal) {
+        Order order = orders.findByIdForUpdate(id)
+                .orElseThrow(() -> BusinessException.notFound(ErrorCode.ORDER_NOT_FOUND, "Pedido nao encontrado."));
+
+        if (!order.getUserId().equals(principal.userId())) {
             throw BusinessException.notFound(ErrorCode.ORDER_NOT_FOUND, "Pedido nao encontrado.");
         }
 

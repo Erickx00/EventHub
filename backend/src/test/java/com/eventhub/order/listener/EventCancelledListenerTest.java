@@ -63,8 +63,8 @@ class EventCancelledListenerTest {
     }
 
     private void stubOrders(List<Order> pending, List<Order> paid) {
-        when(orders.findAllByEventIdAndStatus(eventId, OrderStatus.PENDING)).thenReturn(pending);
-        when(orders.findAllByEventIdAndStatus(eventId, OrderStatus.PAID)).thenReturn(paid);
+        when(orders.findAllByEventIdAndStatusForUpdate(eventId, OrderStatus.PENDING)).thenReturn(pending);
+        when(orders.findAllByEventIdAndStatusForUpdate(eventId, OrderStatus.PAID)).thenReturn(paid);
     }
 
     @Test
