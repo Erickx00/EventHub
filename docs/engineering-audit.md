@@ -100,7 +100,9 @@ Branches de melhorias comportamentais não devem ser mescladas/deployadas sem CI
 - Auditoria registrada: concluída nesta branch.
 - Melhoria implementada nesta branch: transições de pedido agora compartilham lock pessimista; expiração seleciona IDs e recarrega/revalida sob lock; cancelamento do evento bloqueia pedidos antes da transição.
 - Branches: `improvement/concurrency` (a partir de `origin/main`).
-- PRs: nenhum ainda; o teste PostgreSQL concorrente precisa rodar no CI/ambiente PostgreSQL isolado antes de considerar o PR validado.
-- Testes executados: backend `mvn test` e `mvn verify` passaram com 111 testes (0 falhas); 5 testes PostgreSQL foram pulados porque não havia banco disponível nem daemon Docker ativo. Frontend `npm run typecheck` e `npm run build` passaram.
-- Pendências prioritárias: executar o teste de concorrência e validação de schema em PostgreSQL; decisão sobre confiança do gateway simulado; rotação atômica do refresh token.
-- Riscos que requerem aprovação: qualquer gateway financeiro, migration, deploy ou configuração de produção. A correção de concorrência foi aprovada pelo usuário nesta conversa e está isolada nesta branch; não foi implantada.
+- PRs: [#1](https://github.com/Erickx00/EventHub/pull/1) mesclado em `main` pelo usuário; merge commit `2bb8c15`. O merge ocorreu enquanto o CI ainda estava em andamento; os jobs terminaram com sucesso depois.
+- Testes locais: backend `mvn verify` passou com 111 testes e 0 falhas; 5 testes PostgreSQL foram pulados por não haver banco local/daemon Docker. Frontend `npm run typecheck` e `npm run build` passaram.
+- CI do PR #1: execução [#17](https://github.com/Erickx00/EventHub/actions/runs/45510019331) concluída com sucesso nos jobs `Backend (Java 21 + PostgreSQL)` e `Frontend (Node 22)`. O job backend executa `mvn verify` com `IT_POSTGRES=true` e PostgreSQL de serviço, incluindo o novo teste de concorrência e a validação de schema.
+- Deploy: não foi executado pelo agente nem verificado. `render.yaml` configura `autoDeploy: true`; portanto, um deploy pode ter sido disparado pelo merge e requer confirmação no painel do Render.
+- Pendências prioritárias: decisão sobre confiança do gateway simulado; rotação atômica do refresh token; execução segura de migrations/otimizações de banco após análise de dados e staging.
+- Riscos que requerem aprovação: mudanças de comportamento ainda não aprovadas, qualquer gateway financeiro, migration, deploy ou configuração de produção. A correção de concorrência foi aprovada e mergeada pelo usuário; seu estado de deploy não foi verificado.
